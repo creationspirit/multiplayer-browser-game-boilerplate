@@ -1,27 +1,34 @@
 import * as BABYLON from 'babylonjs';
 import React, { Component } from 'react';
 
-export interface SceneEventArgs {
+export interface ISceneEventArgs {
   engine: BABYLON.Engine;
   scene: BABYLON.Scene;
-  canvas: HTMLCanvasElement;
+  canvas: HTMLCanvasElement | null;
 }
 
-export interface SceneProps {
+export interface ISceneProps {
   engineOptions?: BABYLON.EngineOptions;
   adaptToDeviceRatio?: boolean;
-  onSceneMount?: (args: SceneEventArgs) => void;
+  onSceneMount?: (args: ISceneEventArgs) => void;
   width?: string;
   height?: string;
 }
 
 export default class Scene extends Component<
-  SceneProps & React.HTMLAttributes<HTMLCanvasElement>,
+  ISceneProps & React.HTMLAttributes<HTMLCanvasElement>,
   {}
 > {
-  private scene!: BABYLON.Scene;
-  private engine!: BABYLON.Engine;
-  private canvas!: HTMLCanvasElement;
+  private scene: BABYLON.Scene | null;
+  private engine: BABYLON.Engine | null;
+  private canvas: React.RefObject<HTMLCanvasElement>;
+
+  constructor(props: ISceneProps) {
+    super(props);
+    this.scene = null;
+    this.engine = null;
+    this.canvas = React.createRef<HTMLCanvasElement>();
+  }
 
   onResizeWindow = () => {
     if (this.engine) {
@@ -29,26 +36,25 @@ export default class Scene extends Component<
     }
   };
 
-  shouldComponentUpdate(nextProps: SceneProps, nextState: {}) {
+  shouldComponentUpdate(nextProps: ISceneProps, nextState: {}) {
     return false;
   }
 
   componentDidMount() {
     this.engine = new BABYLON.Engine(
-      this.canvas,
+      this.canvas.current,
       true,
       this.props.engineOptions,
       this.props.adaptToDeviceRatio
     );
 
-    let scene = new BABYLON.Scene(this.engine);
-    this.scene = scene;
+    this.scene = new BABYLON.Scene(this.engine);
 
     if (typeof this.props.onSceneMount === 'function') {
       this.props.onSceneMount({
-        scene,
+        scene: this.scene,
         engine: this.engine,
-        canvas: this.canvas,
+        canvas: this.canvas.current,
       });
     } else {
       console.error('onSceneMount function not available');
@@ -62,24 +68,18 @@ export default class Scene extends Component<
     window.removeEventListener('resize', this.onResizeWindow);
   }
 
-  onCanvasLoaded = (c: HTMLCanvasElement) => {
-    if (c !== null) {
-      this.canvas = c;
-    }
-  };
-
   render() {
     // 'rest' can contain additional properties that you can flow through to canvas:
     // (id, className, etc.)
-    let { width, height, ...rest } = this.props;
+    const { width, height, ...rest } = this.props;
 
-    let opts: any = {};
+    const opts: any = {};
 
     if (width !== undefined && height !== undefined) {
       opts.width = width;
       opts.height = height;
     }
 
-    return <canvas id="renderCanvas" {...opts} ref={this.onCanvasLoaded} />;
+    return <canvas id="renderCanvas" {...opts} ref={this.canvas} />;
   }
 }
