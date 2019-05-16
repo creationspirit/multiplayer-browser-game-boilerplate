@@ -3,7 +3,8 @@ import * as React from 'react';
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 
-import BabylonScene, { ISceneEventArgs } from './Scene'; // import the component above linking to file we just created.
+import BabylonScene, { ISceneEventArgs } from './Scene';
+import CodeEditor from './CodeEditor';
 
 export default class PageWithScene extends React.Component<{}, {}> {
   state = { inSolvingAreaOf: undefined, taskInProgress: false };
@@ -199,7 +200,7 @@ export default class PageWithScene extends React.Component<{}, {}> {
           height={'650'}
           width={'1200'}
         />
-        {this.state.taskInProgress && <div className="code-editor">I am a little code editor!</div>}
+        {this.state.taskInProgress && <CodeEditor />}
       </div>
     );
   }
