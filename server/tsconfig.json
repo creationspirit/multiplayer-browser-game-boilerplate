@@ -1,29 +1,26 @@
 {
   "compilerOptions": {
-    // "plugins": [
-    //   {
-    //     "name": "typescript-tslint-plugin"
-    //   }
-    // ],
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin"
+      }
+    ],
     "allowJs": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
     "sourceMap": true,
     "target": "es6",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "baseUrl": "."
   },
   "include": ["src/**/*"],
   "types": ["babylonjs"],
   "paths": {
     "*": ["node_modules/*", "src/types/*"]
-  },
-  "outDir": "dist"
+  }
 }
