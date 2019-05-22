@@ -5,6 +5,7 @@
         "name": "typescript-tslint-plugin"
       }
     ],
+    "experimentalDecorators": true,
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
