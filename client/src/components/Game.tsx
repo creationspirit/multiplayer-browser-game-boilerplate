@@ -2,12 +2,42 @@ import * as React from 'react';
 
 import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
+import * as Colyseus from 'colyseus.js';
 
-import BabylonScene, { ISceneEventArgs } from './Scene';
 import CodeEditor from './CodeEditor';
+import BabylonScene, { ISceneEventArgs } from './Scene';
 
-export default class PageWithScene extends React.Component<{}, {}> {
+export interface IGameProps {
+  client: Colyseus.Client;
+}
+
+export default class PageWithScene extends React.Component<IGameProps, {}> {
   state = { inSolvingAreaOf: undefined, taskInProgress: false };
+
+  private room: Colyseus.Room;
+
+  constructor(props: IGameProps) {
+    super(props);
+    this.room = props.client.join('game');
+    this.room.onJoin.add(() => {
+      console.log('client joined successfully');
+
+      this.room.state.players.onAdd = (player: any, sessionId: any) => {
+        console.log(player, 'has been added at', sessionId);
+      };
+
+      this.room.state.players.onRemove = (player: any, sessionId: any) => {
+        console.log(player, 'has been removed from', sessionId);
+      };
+
+      this.room.state.players.onChange = (player: any, sessionId: any) => {
+        console.log(player, 'has been changed, ', sessionId);
+      };
+    });
+    this.room.onStateChange.add((state: any) => {
+      console.log('the room state has been updated:', state);
+    });
+  }
 
   createLabel = (mesh: BABYLON.AbstractMesh) => {
     const label = new GUI.Rectangle('label for ' + mesh.name);
@@ -65,9 +95,9 @@ export default class PageWithScene extends React.Component<{}, {}> {
 
     const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui');
     // console.log(advancedTexture);
-
+    console.log(process.env.PUBLIC_URL);
     BABYLON.ParticleHelper.BaseAssetsUrl = `${process.env.PUBLIC_URL}/assets/`;
-
+    // BABYLON.Constants.PARTICLES_BaseAssetsUrl = ''
     // This creates and positions a free camera (non-mesh)
     const camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 2, -3), scene);
     camera.speed = 0.3;

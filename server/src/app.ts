@@ -1,8 +1,8 @@
+import path from 'path';
+
 import bodyParser from 'body-parser';
 import express from 'express';
 import morgan from 'morgan';
-
-import logger from './utils/logger';
 
 import * as apiController from './controllers/api';
 
@@ -10,6 +10,7 @@ import * as apiController from './controllers/api';
 const app = express();
 
 app.set('port', process.env.PORT || 4000);
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

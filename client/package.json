@@ -11,10 +11,12 @@
     "babylonjs": "^4.0.3",
     "babylonjs-gui": "^4.0.3",
     "cannon": "^0.6.2",
+    "colyseus.js": "^0.10.6",
     "react": "^16.8.3",
     "react-ace": "^6.5.0",
     "react-dom": "^16.8.3",
     "react-redux": "^6.0.1",
+    "react-router-dom": "^5.0.0",
     "react-scripts": "2.1.5",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
@@ -38,6 +40,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@types/react-router-dom": "^4.3.3",
     "prettier": "^1.16.4",
     "prettier-tslint": "^0.4.2",
     "tslint": "^5.13.1",

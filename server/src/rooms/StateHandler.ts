@@ -12,6 +12,7 @@ export class StateHandler extends Schema {
   }
 
   addPlayer(clientId: string, player: Player): void {
+    console.log('added player for ', clientId);
     this.players[clientId] = player;
   }
 
