@@ -35,7 +35,7 @@ export class GameRoom extends Room<StateHandler> {
 
   // When a client sends a message
   onMessage(client: Client, message: any) {
-    const player = this.state.getPlayer(client.id);
+    const player = this.state.getPlayer(client.sessionId);
 
     console.log(`[ ${client.sessionId} ]`, player.name, 'sent:', message);
   }

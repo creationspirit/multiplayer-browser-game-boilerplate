@@ -10,7 +10,7 @@ import * as apiController from './controllers/api';
 const app = express();
 
 app.set('port', process.env.PORT || 4000);
-app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

@@ -6,6 +6,11 @@ import * as Colyseus from 'colyseus.js';
 
 import CodeEditor from './CodeEditor';
 import BabylonScene, { ISceneEventArgs } from './Scene';
+import { Player } from '../game/Player';
+import { RouterService } from '../game/routing/routerService';
+import { Lights } from '../game/Lights';
+import { Pickup } from '../game/Pickup';
+import { Area } from '../game/Area';
 
 export interface IGameProps {
   client: Colyseus.Client;
@@ -14,50 +19,13 @@ export interface IGameProps {
 export default class PageWithScene extends React.Component<IGameProps, {}> {
   state = { inSolvingAreaOf: undefined, taskInProgress: false };
 
-  private room: Colyseus.Room;
+  private router: RouterService;
 
   constructor(props: IGameProps) {
     super(props);
-    this.room = props.client.join('game');
-    this.room.onJoin.add(() => {
-      console.log('client joined successfully');
-
-      this.room.state.players.onAdd = (player: any, sessionId: any) => {
-        console.log(player, 'has been added at', sessionId);
-      };
-
-      this.room.state.players.onRemove = (player: any, sessionId: any) => {
-        console.log(player, 'has been removed from', sessionId);
-      };
-
-      this.room.state.players.onChange = (player: any, sessionId: any) => {
-        console.log(player, 'has been changed, ', sessionId);
-      };
-    });
-    this.room.onStateChange.add((state: any) => {
-      console.log('the room state has been updated:', state);
-    });
+    const room = props.client.join('game');
+    this.router = new RouterService(room);
   }
-
-  createLabel = (mesh: BABYLON.AbstractMesh) => {
-    const label = new GUI.Rectangle('label for ' + mesh.name);
-    label.background = 'black';
-    label.height = 0.05;
-    label.alpha = 0.5;
-    label.width = 0.15;
-    label.cornerRadius = 20;
-    label.thickness = 1;
-    label.linkOffsetY = -400;
-
-    const text1 = new GUI.TextBlock();
-    text1.resizeToFit = true;
-    text1.text = 'Press SPACE to start solving';
-    text1.fontSize = 24;
-    text1.color = 'white';
-    label.addControl(text1);
-
-    return label;
-  };
 
   onSceneMount = (args: ISceneEventArgs) => {
     const { canvas, scene, engine } = args;
@@ -65,26 +33,11 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
     scene.gravity = new BABYLON.Vector3(0, -5, 0);
     scene.collisionsEnabled = true;
 
-    const ground = BABYLON.MeshBuilder.CreatePlane('myPlane', { width: 50, height: 50 }, scene);
-    ground.position = new BABYLON.Vector3(0, 0.2, 0);
-    ground.checkCollisions = true;
-    ground.visibility = 0;
-    ground.isPickable = false;
-    ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
+    const area = new Area(scene);
+    area.init();
 
-    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
-
-    const pointLight = new BABYLON.PointLight('light', new BABYLON.Vector3(0, 2.4, 0), scene);
-    pointLight.diffuse = new BABYLON.Color3(1, 1, 1);
-    pointLight.specular = new BABYLON.Color3(0.5, 0.5, 0.5);
-
-    const shadowGenerator = new BABYLON.ShadowGenerator(1024, pointLight);
-    shadowGenerator.setDarkness(0.5);
-    shadowGenerator.usePoissonSampling = true;
-
-    // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.4;
+    const lights = new Lights(scene);
+    lights.init();
 
     const skyboxTexture = new BABYLON.CubeTexture(
       `${process.env.PUBLIC_URL}/assets/textures/skybox/space`,
@@ -94,28 +47,12 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
     scene.createDefaultSkybox(skyboxTexture, false, 1000);
 
     const advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui');
-    // console.log(advancedTexture);
-    console.log(process.env.PUBLIC_URL);
+
     BABYLON.ParticleHelper.BaseAssetsUrl = `${process.env.PUBLIC_URL}/assets/`;
     // BABYLON.Constants.PARTICLES_BaseAssetsUrl = ''
-    // This creates and positions a free camera (non-mesh)
-    const camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 2, -3), scene);
-    camera.speed = 0.3;
-    camera.applyGravity = true;
-    camera.ellipsoid = new BABYLON.Vector3(1, 1, 1);
-    const cameraCollider = BABYLON.MeshBuilder.CreateBox('collider', { size: 1 }, scene);
-    cameraCollider.parent = camera;
-    camera.checkCollisions = true;
-    camera.keysUp = [87]; // w
-    camera.keysDown = [83]; // S
-    camera.keysLeft = [65]; // A
-    camera.keysRight = [68]; // D
-    // This targets the camera to scene origin
-    camera.setTarget(BABYLON.Vector3.Zero());
 
-    scene.activeCamera = camera;
-    // This attaches the camera to the canvas
-    camera.attachControl(canvas as HTMLElement, true);
+    const player = new Player(scene, 'player');
+    player.init();
 
     const assetsManager = new BABYLON.AssetsManager(scene);
     const corridorTask = assetsManager.addMeshTask(
@@ -133,63 +70,42 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
     );
 
     corridorTask.onSuccess = task => {
-      task.loadedMeshes[0].receiveShadows = true;
-      task.loadedMeshes[0].checkCollisions = false;
+      task.loadedMeshes.forEach(mesh => {
+        if (mesh.id !== 'Corridor4exits') {
+          mesh.visibility = 0;
+        }
+      });
     };
 
     pickupTask.onSuccess = task => {
-      const pickupMesh = task.loadedMeshes[0];
+      const prefabPickup = task.loadedMeshes[0] as BABYLON.Mesh;
+      prefabPickup.isVisible = false;
 
-      const boundingBox = BABYLON.MeshBuilder.CreateBox(
-        'pickupBox',
-        { width: 1, height: 4, depth: 1 },
-        scene
-      );
-      boundingBox.position = pickupMesh.position;
-      boundingBox.checkCollisions = true;
-      boundingBox.visibility = 0;
-      boundingBox.isPickable = false;
+      const pickUp = new PickUp(scene, 'pickup1', prefabPickup);
+      pickUp.init(lights);
 
-      const solveAreaBox = BABYLON.MeshBuilder.CreateBox(
-        'pickupBox',
-        { width: 3, height: 4, depth: 3 },
-        scene
-      );
-      solveAreaBox.position = pickupMesh.position;
-      solveAreaBox.visibility = 0;
-      solveAreaBox.isPickable = false;
-
-      scene.beginAnimation(pickupMesh, 0, 420, true);
-
-      shadowGenerator.addShadowCaster(pickupMesh);
-
-      BABYLON.ParticleHelper.CreateAsync('pickupEmit', scene).then(set => {
-        set.start();
-      });
-
-      const label = this.createLabel(pickupMesh);
-      cameraCollider.actionManager = new BABYLON.ActionManager(scene);
-      cameraCollider.actionManager.registerAction(
+      player.actionTriggerBox.actionManager = new BABYLON.ActionManager(scene);
+      player.actionTriggerBox.actionManager.registerAction(
         new BABYLON.ExecuteCodeAction(
           {
             trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
-            parameter: solveAreaBox,
+            parameter: pickUp.solveAreaBox,
           },
           () => {
-            advancedTexture.addControl(label);
-            label.linkWithMesh(pickupMesh);
-            this.setState({ inSolvingAreaOf: pickupMesh });
+            advancedTexture.addControl(pickUp.label);
+            pickUp.label.linkWithMesh(pickUp.pickupMesh);
+            this.setState({ inSolvingAreaOf: pickUp.pickupMesh });
           }
         )
       );
-      cameraCollider.actionManager.registerAction(
+      player.actionTriggerBox.actionManager.registerAction(
         new BABYLON.ExecuteCodeAction(
           {
             trigger: BABYLON.ActionManager.OnIntersectionExitTrigger,
-            parameter: solveAreaBox,
+            parameter: pickUp.solveAreaBox,
           },
           () => {
-            advancedTexture.removeControl(label);
+            advancedTexture.removeControl(pickUp.label);
             this.setState({ inSolvingAreaOf: undefined, taskInProgress: false });
           }
         )
@@ -214,6 +130,7 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
 
     assetsManager.onFinish = tasks => {
       engine.runRenderLoop(() => {
+        player.sendMovement(this.router);
         scene.render();
       });
     };

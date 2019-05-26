@@ -4,7 +4,7 @@
       "name": "pickupHalo",
       "id": "pickupHalo",
       "capacity": 1500,
-      "emitterId": "Barrel_WideS",
+      "emitterId": "pickup",
       "particleEmitterType": {
         "type": "SphereParticleEmitter",
         "radius": 0.01,
