@@ -1,6 +1,8 @@
 import * as BABYLON from 'babylonjs';
 import { RouterService } from './routing/routerService';
 
+import { Pickup } from './Pickup';
+
 export const LEFT: number = 65; // A
 export const RIGHT: number = 68; // D
 export const UP: number = 87; // W
@@ -15,13 +17,15 @@ export class Player {
   actionTriggerBox!: BABYLON.Mesh;
   id: string;
 
+  inSolvingAreaOf?: Pickup;
+
   constructor(scene: BABYLON.Scene, id: string) {
     this.scene = scene;
     this.id = id;
   }
 
-  init() {
-    this.camera = new BABYLON.UniversalCamera('player', new BABYLON.Vector3(0, 2, -3), this.scene);
+  init(position: BABYLON.Vector3) {
+    this.camera = new BABYLON.UniversalCamera('player', position, this.scene);
     this.camera.speed = this.speed;
     this.camera.applyGravity = true;
     this.camera.ellipsoid = new BABYLON.Vector3(1, 0.75, 1);
@@ -36,6 +40,7 @@ export class Player {
     // This mesh is used to trigger actions on intersection
     this.actionTriggerBox = BABYLON.MeshBuilder.CreateBox('collider', { size: 1 }, this.scene);
     this.actionTriggerBox.parent = this.camera;
+    this.actionTriggerBox.actionManager = new BABYLON.ActionManager(this.scene);
 
     // This attaches the camera to the canvas
     this.camera.attachControl(
@@ -58,6 +63,10 @@ export class Player {
       },
       false
     );
+  }
+
+  getActionManager() {
+    return this.actionTriggerBox.actionManager as BABYLON.ActionManager;
   }
 
   private keyDownEvt(evt: KeyboardEvent) {

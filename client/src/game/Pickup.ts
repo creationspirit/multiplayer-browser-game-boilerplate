@@ -19,14 +19,15 @@ export class Pickup {
     this.pickupMesh.isVisible = false;
   }
 
-  init(lights: Lights) {
+  init(lights: Lights, position: BABYLON.Vector3) {
+    // this.pickupMesh.position = position;
     this.boundingBox = BABYLON.MeshBuilder.CreateBox(
       `boundingBox_${this.id}`,
       { width: 1, height: 4, depth: 1 },
       this.scene
     );
-    this.boundingBox.position = this.pickupMesh.position;
-    this.boundingBox.parent = this.pickupMesh;
+    this.boundingBox.position = position;
+    this.pickupMesh.parent = this.boundingBox;
     this.boundingBox.checkCollisions = true;
     this.boundingBox.isVisible = false;
     this.boundingBox.isPickable = false;
@@ -36,7 +37,7 @@ export class Pickup {
       { width: 3, height: 4, depth: 3 },
       this.scene
     );
-    this.solveAreaBox.position = this.pickupMesh.position;
+    this.solveAreaBox.position = position;
     this.solveAreaBox.isVisible = false;
     this.solveAreaBox.isPickable = false;
 

@@ -1,0 +1,68 @@
+Exporter version: 5.6.4, Blender version: 2.79 (sub 0)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used :
+		export scope        :  ALL
+		inline textures     :  false
+		Positions Precision :  4
+		Normals Precision   :  3
+		UVs Precision       :  3
+		Vert Color Precision:  3
+		Mat Weight Precision:  2
+		texture directory   :  /Users/andrija/Projects/babylon-code-game/client/public/assets/
+	Python World class constructor completed
+	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
+	processing begun of mesh:  CorridorT
+		processing begun of Standard material:  Corridor1Mat
+		processing begun of Standard material:  Corridor1Light
+		processing begun of multimaterial:  corridorT.Multimaterial#0
+		num positions      :  4641
+		num normals        :  4641
+		num uvs            :  9282
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6441
+		WARNING: # of 0 area faces found:  68
+	processing begun of mesh:  colliderT4
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+	processing begun of mesh:  colliderT5
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+	processing begun of mesh:  colliderT3
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+	processing begun of mesh:  colliderT2
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+	processing begun of mesh:  colliderT1
+		WARNING: No materials have been assigned: 
+		num positions      :  4
+		num normals        :  4
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  6
+========= Writing of scene file started =========
+========= Writing of scene file completed =========
+========= end of processing =========
+elapsed time:  0 min, 0.2153 secs

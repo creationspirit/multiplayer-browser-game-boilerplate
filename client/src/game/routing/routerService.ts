@@ -12,19 +12,19 @@ export class RouterService {
       console.log('client joined successfully');
 
       this.room.state.players.onAdd = (player: any, sessionId: any) => {
-        console.log(player, 'has been added at', sessionId);
+        // console.log(player, 'has been added at', sessionId);
       };
 
       this.room.state.players.onRemove = (player: any, sessionId: any) => {
-        console.log(player, 'has been removed from', sessionId);
+        // console.log(player, 'has been removed from', sessionId);
       };
 
       this.room.state.players.onChange = (player: any, sessionId: any) => {
-        console.log(player, 'has been changed, ', sessionId);
+        // console.log(player, 'has been changed, ', sessionId);
       };
     });
     this.room.onStateChange.add((state: any) => {
-      console.log('the room state has been updated:', state);
+      // console.log('the room state has been updated:', state);
     });
   }
 
