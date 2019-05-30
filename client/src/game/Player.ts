@@ -88,7 +88,7 @@ export class Player {
 
     if (this.keyDown[UP] || this.keyDown[DOWN] || this.keyDown[LEFT] || this.keyDown[RIGHT]) {
       router.sendMovement(
-        direction,
+        new BABYLON.Vector2(direction.x, direction.z),
         this.keyDown[UP],
         this.keyDown[DOWN],
         this.keyDown[LEFT],

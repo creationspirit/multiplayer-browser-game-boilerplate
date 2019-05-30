@@ -5,7 +5,8 @@
     "no-console": [false],
     "object-literal-sort-keys": [false],
     "ordered-imports": false,
-    "no-empty": false
+    "no-empty": false,
+    "member-ordering": false
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

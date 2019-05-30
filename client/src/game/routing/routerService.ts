@@ -1,10 +1,12 @@
 import * as Colyseus from 'colyseus.js';
-import { Vector3 } from 'babylonjs';
+import { Vector2 } from 'babylonjs';
+
+import { Game } from '../Game';
 
 export const PLAYER_MOVEMENT: string = 'move';
 
 export class RouterService {
-  private room: Colyseus.Room;
+  room: Colyseus.Room;
 
   constructor(room: Colyseus.Room) {
     this.room = room;
@@ -20,16 +22,25 @@ export class RouterService {
       };
 
       this.room.state.players.onChange = (player: any, sessionId: any) => {
-        // console.log(player, 'has been changed, ', sessionId);
+        console.log(player, 'has been changed, ', sessionId);
       };
     });
-    this.room.onStateChange.add((state: any) => {
-      // console.log('the room state has been updated:', state);
+    // this.room.onStateChange.add((state: any) => {
+    //   console.log('the room state has been updated:', state);
+    // });
+  }
+
+  initGameState(init: (arg0: any) => void) {
+    this.room.onMessage.addOnce((message: any) => {
+      console.log(message);
+      if (message.type === 'LVL_INIT') {
+        init(message.data);
+      }
     });
   }
 
   sendMovement(
-    direction: Vector3,
+    direction: Vector2,
     keyUp: boolean,
     keyDown: boolean,
     keyLeft: boolean,

@@ -1,22 +1,16 @@
 import { Schema, type, MapSchema } from '@colyseus/schema';
-import { Player } from '../entities/Player';
+import { PlayerState } from './state/PlayerState';
 
 export class StateHandler extends Schema {
-  @type({ map: Player })
-  players = new MapSchema<Player>();
+  @type({ map: PlayerState })
+  players = new MapSchema<PlayerState>();
 
-  update(): void {
-    //
-    // Implement your server-side game loop here
-    //
-  }
-
-  addPlayer(clientId: string, player: Player): void {
+  addPlayer(clientId: string, player: PlayerState): void {
     console.log('added player for ', clientId);
     this.players[clientId] = player;
   }
 
-  getPlayer(clientId: string): Player {
+  getPlayer(clientId: string): PlayerState {
     return this.players[clientId];
   }
 

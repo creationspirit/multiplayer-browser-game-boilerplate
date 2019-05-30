@@ -24,8 +24,6 @@ export class Area {
     this.ground.rotation = new BABYLON.Vector3(Math.PI / 2, 0, 0);
 
     data.forEach((meshData, index) => {
-      console.log(prefabs);
-      console.log(meshData.type);
       const mesh = prefabs[meshData.type].clone(`area${index}`);
       mesh.position = createVector(meshData.position);
       mesh.rotation = createVector(meshData.rotation);
