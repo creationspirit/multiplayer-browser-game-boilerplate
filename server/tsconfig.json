@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin"
+      }
+    ],
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "target": "es6",
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "baseUrl": "."
+  },
+  "include": ["src/**/*"],
+  "types": ["babylonjs"],
+  "paths": {
+    "*": ["node_modules/*", "src/types/*"]
+  }
+}

@@ -3,7 +3,9 @@
   "rules": {
     "member-access": [true, "no-public"],
     "no-console": [false],
-    "object-literal-sort-keys": [false]
+    "object-literal-sort-keys": [false],
+    "ordered-imports": [false],
+    "member-ordering": false
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

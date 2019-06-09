@@ -1,41 +1,42 @@
 import * as React from 'react';
 
 import * as BABYLON from 'babylonjs';
-import BabylonScene, { ISceneEventArgs } from './Scene'; // import the component above linking to file we just created.
+import * as GUI from 'babylonjs-gui';
+import * as Colyseus from 'colyseus.js';
 
-export default class PageWithScene extends React.Component<{}, {}> {
+import CodeEditor from './CodeEditor';
+import BabylonScene, { ISceneEventArgs } from './Scene';
+import { RouterService } from '../game/routing/routerService';
+import { Game } from '../game/Game';
+
+export interface IGameProps {
+  client: Colyseus.Client;
+}
+
+export default class PageWithScene extends React.Component<IGameProps, {}> {
+  state = { taskInProgress: false };
+
+  private game!: Game;
+
   onSceneMount = (args: ISceneEventArgs) => {
     const { canvas, scene, engine } = args;
 
-    // This creates and positions a free camera (non-mesh)
-    const camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 5, -10), scene);
+    this.game = new Game(
+      args,
+      this.props.client,
+      this.setTaskInProgress,
+      this.removeTaskInProgress
+    );
+    this.game.load();
+    this.game.start();
+  };
 
-    // This targets the camera to scene origin
-    camera.setTarget(BABYLON.Vector3.Zero());
+  setTaskInProgress = () => {
+    this.setState({ taskInProgress: true });
+  };
 
-    // This attaches the camera to the canvas
-    camera.attachControl(canvas as HTMLElement, true);
-
-    // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-    const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
-
-    // Default intensity is 1. Let's dim the light a small amount
-    light.intensity = 0.7;
-
-    // Our built-in 'sphere' shape. Params: name, subdivs, size, scene
-    const sphere = BABYLON.Mesh.CreateSphere('sphere1', 16, 2, scene);
-
-    // Move the sphere upward 1/2 its height
-    sphere.position.y = 1;
-
-    // Our built-in 'ground' shape. Params: name, width, depth, subdivs, scene
-    BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, scene);
-
-    engine.runRenderLoop(() => {
-      if (scene) {
-        scene.render();
-      }
-    });
+  removeTaskInProgress = () => {
+    this.setState({ taskInProgress: false });
   };
 
   render() {
@@ -47,6 +48,7 @@ export default class PageWithScene extends React.Component<{}, {}> {
           height={'650'}
           width={'1200'}
         />
+        {this.state.taskInProgress && <CodeEditor />}
       </div>
     );
   }
