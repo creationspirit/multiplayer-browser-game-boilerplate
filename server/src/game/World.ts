@@ -42,7 +42,7 @@ export class World {
 
   private storePrefab(prefabName: string, task: BABYLON.MeshAssetTask) {
     console.log('storing prefab', prefabName);
-    console.log(task.loadedMeshes);
+    // console.log(task.loadedMeshes);
     const prefabMesh = task.loadedMeshes.find(mesh => mesh.id === prefabName) as BABYLON.Mesh;
     prefabMesh.setEnabled(false);
     this.prefabs[prefabName] = prefabMesh;
@@ -62,35 +62,20 @@ export class World {
       this.scene
     );
     const corridor4Task = this.createMeshTask('corridor4', 'corridor4.babylon');
-    // const corridorTask = this.createMeshTask('corridor', 'corridorNormal.babylon');
-    // const corridorTTask = this.createMeshTask('corridorT', 'corridorT.babylon');
-    // const corridorLTask = this.createMeshTask('corridorL', 'corridorL.babylon');
+    const corridorTask = this.createMeshTask('corridor', 'corridorNormal.babylon');
+    const corridorTTask = this.createMeshTask('corridorT', 'corridorT.babylon');
+    const corridorLTask = this.createMeshTask('corridorL', 'corridorL.babylon');
 
     corridor4Task.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_4, task);
     corridor4Task.onError = (task, message, exception) => console.log(message, exception);
-    // corridorTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR, task);
-    // corridorTask.onError = (task, message, exception) => console.log(message, exception);
-    // corridorTTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_T, task);
-    // corridorTTask.onError = (task, message, exception) => console.log(message, exception);
-    // corridorLTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_L, task);
-    // corridorLTask.onError = (task, message, exception) => console.log(message, exception);
-    // console.log('callbacks added');
-    // BABYLON.SceneLoader.ImportMesh(
-    //   'him',
-    //   'http://localhost:4000/assets/',
-    //   'corridor4.babylon',
-    //   this.scene,
-    //   (newMeshes, particleSystems2, skeletons) => {
-    //     console.log(newMeshes, skeletons);
-    //     // dude.rotation.y = Math.PI;
-    //     // dude.position = new BABYLON.Vector3(0, 0, -80);
-
-    //     // this.scene.beginAnimation(skeletons[0], 0, 100, true, 1.0);
-    //   }
-    // );
+    corridorTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR, task);
+    corridorTask.onError = (task, message, exception) => console.log(message, exception);
+    corridorTTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_T, task);
+    corridorTTask.onError = (task, message, exception) => console.log(message, exception);
+    corridorLTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_L, task);
+    corridorLTask.onError = (task, message, exception) => console.log(message, exception);
 
     this.assetsManager.onFinish = tasks => {
-      console.log('tasks', tasks);
       this.area.init(levelConfig.corridors, this.prefabs);
       levelConfig.pickups.forEach((pickupConfig: any) => {
         const newPickup = new Pickup(this.scene, pickupConfig.id);
@@ -106,13 +91,6 @@ export class World {
       });
     };
     this.assetsManager.load();
-
-    // this.scene.executeWhenReady(() => {
-    //   console.log('scene ready');
-    //   this.engine.runRenderLoop(() => {
-    //     this.scene.render();
-    //   });
-    // });
   }
 
   createPlayer(id: string, position: BABYLON.Vector3): void {

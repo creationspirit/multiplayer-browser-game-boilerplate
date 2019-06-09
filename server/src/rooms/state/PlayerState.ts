@@ -1,4 +1,4 @@
-import { Schema, type, MapSchema } from '@colyseus/schema';
+import { Schema, type } from '@colyseus/schema';
 import { Vector3 } from 'babylonjs';
 
 export class PlayerState extends Schema {

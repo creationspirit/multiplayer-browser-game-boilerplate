@@ -7,6 +7,7 @@ import { Lights } from './Lights';
 import { Pickup } from './Pickup';
 import { Area } from './Area';
 import { Player } from './Player';
+import { Rival } from './Rival';
 import { RouterService } from './routing/routerService';
 import { GAME_ASSETS_URL, SKYBOX_TEXTURES_URL } from './constants';
 import { createVector } from './utils';
@@ -16,7 +17,7 @@ BABYLON.ParticleHelper.BaseAssetsUrl = `${process.env.PUBLIC_URL}/assets/`;
 
 export enum PrefabID {
   PICKUP = 'Barrel_WideS',
-  PLAYER = 'player',
+  PLAYER = 'YBot',
   CORRIDOR = 'Corridor',
   CORRIDOR_4 = 'Corridor4',
   CORRIDOR_T = 'CorridorT',
@@ -31,6 +32,7 @@ export class Game {
   private prefabs: { [id: string]: BABYLON.Mesh } = {};
   private lights: Lights;
   private player!: Player;
+  private rivals: { [id: string]: Rival } = {};
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
 
@@ -52,8 +54,7 @@ export class Game {
     this.engine = args.engine;
     this.scene = args.scene;
 
-    const room = client.join('game');
-    this.router = new RouterService(room);
+    this.router = new RouterService(client);
 
     this.lights = new Lights(this.scene);
     this.area = new Area(this.scene);
@@ -66,16 +67,25 @@ export class Game {
   }
 
   private createMeshTask(taskId: string, fileName: string) {
-    console.log('creating task', taskId);
+    // console.log('creating task', taskId);
     return this.assetsManager.addMeshTask(taskId, '', GAME_ASSETS_URL, fileName);
   }
 
   private storePrefab(prefabName: string, task: BABYLON.MeshAssetTask) {
-    console.log('storing prefab', prefabName);
+    // console.log('storing prefab', prefabName);
     const prefabMesh = task.loadedMeshes.find(mesh => mesh.id === prefabName) as BABYLON.Mesh;
     prefabMesh.getChildMeshes(true).forEach(child => (child.isVisible = false));
     prefabMesh.setEnabled(false);
     this.prefabs[prefabName] = prefabMesh;
+  }
+
+  private storePlayerPrefab(task: BABYLON.MeshAssetTask) {
+    const prefabMesh = task.loadedMeshes.find(
+      mesh => mesh.name === PrefabID.PLAYER
+    ) as BABYLON.Mesh;
+    prefabMesh.getChildMeshes(true).forEach(child => child.setEnabled(false));
+    prefabMesh.setEnabled(false);
+    this.prefabs[PrefabID.PLAYER] = prefabMesh;
   }
 
   load() {
@@ -97,54 +107,37 @@ export class Game {
     const corridorTask = this.createMeshTask('corridor', 'corridorNormal.babylon');
     const corridorTTask = this.createMeshTask('corridorT', 'corridorT.babylon');
     const corridorLTask = this.createMeshTask('corridorL', 'corridorL.babylon');
-
     const pickupTask = this.createMeshTask('pickup', 'pickup.babylon');
-    // const playerTask = this.createMeshTask('player', 'dude.babylon');
+    const playerTask = this.createMeshTask('player', 'player.babylon');
 
     corridor4Task.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_4, task);
     corridorTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR, task);
     corridorTTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_T, task);
     corridorLTask.onSuccess = task => this.storePrefab(PrefabID.CORRIDOR_L, task);
     pickupTask.onSuccess = task => this.storePrefab(PrefabID.PICKUP, task);
-    // playerTask.onSuccess = task => console.log(task);
-
-    BABYLON.SceneLoader.ImportMesh(
-      'him',
-      GAME_ASSETS_URL,
-      'dude.babylon',
-      this.scene,
-      (newMeshes, particleSystems2, skeletons) => {
-        console.log(newMeshes, skeletons);
-        // dude.rotation.y = Math.PI;
-        // dude.position = new BABYLON.Vector3(0, 0, -80);
-
-        // this.scene.beginAnimation(skeletons[0], 0, 100, true, 1.0);
-      }
-    );
+    playerTask.onSuccess = task => this.storePlayerPrefab(task);
 
     this.assetsManager.onFinish = tasks => {
       console.log(tasks);
-      this.initGameState(() => this.run());
+      this.router.connect(this, 'game');
     };
   }
 
-  initGameState(loaded: () => void) {
-    this.router.initGameState((levelConfig: any) => {
-      this.area.init(levelConfig.corridors, this.prefabs);
-      this.lights.init(levelConfig.lights);
-      levelConfig.pickups.forEach((pickupConfig: any) => {
-        const newPickup = new Pickup(this.scene, pickupConfig.id, this.prefabs[PrefabID.PICKUP]);
-        newPickup.init(this.lights, createVector(pickupConfig.position));
-        this.pickups[newPickup.id] = newPickup;
-      });
-      this.player = new Player(this.scene, 'player');
-      this.player.init(createVector(levelConfig.spawnPoint));
-      this.setupPlayerActions();
-      loaded();
+  initGameStateAndRun(levelConfig: any) {
+    this.area.init(levelConfig.corridors, this.prefabs);
+    this.lights.init(levelConfig.lights);
+    levelConfig.pickups.forEach((pickupConfig: any) => {
+      const newPickup = new Pickup(this.scene, pickupConfig.id, this.prefabs[PrefabID.PICKUP]);
+      newPickup.init(this.lights, createVector(pickupConfig.position));
+      this.pickups[newPickup.id] = newPickup;
     });
+    this.player = new Player(this.scene, this.router.room.sessionId);
+    this.player.init(createVector(levelConfig.spawnPoint));
+    this.setupPlayerActions();
+    this.run();
   }
 
-  run() {
+  private run() {
     this.scene.executeWhenReady(() => {
       this.engine.runRenderLoop(() => {
         this.player.sendMovement(this.router);
@@ -201,5 +194,21 @@ export class Game {
         )
       );
     });
+  }
+
+  addPlayer(key: string, position: BABYLON.Vector3) {
+    const newRival = new Rival(this.scene, this.prefabs[PrefabID.PLAYER], key);
+    newRival.init(position);
+    this.rivals[key] = newRival;
+  }
+
+  updatePlayer(key: string, position: BABYLON.Vector3) {
+    if (key === this.player.id) {
+      position.y = 2;
+      this.player.update(position);
+    }
+    if (this.rivals[key]) {
+      this.rivals[key].update(position);
+    }
   }
 }

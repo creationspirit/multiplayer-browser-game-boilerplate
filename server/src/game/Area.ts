@@ -26,7 +26,6 @@ export class Area {
       mesh.rotation = createVector(meshData.rotation);
       mesh.setEnabled(true);
       this.meshes.push(mesh);
-      console.log(this.meshes);
     });
   }
 }

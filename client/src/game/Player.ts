@@ -82,13 +82,12 @@ export class Player {
   }
 
   sendMovement(router: RouterService) {
-    const direction: BABYLON.Vector3 = this.camera.position.subtract(
-      this.camera.getFrontPosition(1)
-    );
-
     if (this.keyDown[UP] || this.keyDown[DOWN] || this.keyDown[LEFT] || this.keyDown[RIGHT]) {
+      const direction: BABYLON.Vector3 = this.camera
+        .getFrontPosition(1)
+        .subtract(this.camera.position);
       router.sendMovement(
-        new BABYLON.Vector2(direction.x, direction.z),
+        new BABYLON.Vector2(direction.x, direction.z).normalize(),
         this.keyDown[UP],
         this.keyDown[DOWN],
         this.keyDown[LEFT],

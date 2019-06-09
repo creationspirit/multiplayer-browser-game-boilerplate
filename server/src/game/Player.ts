@@ -3,7 +3,7 @@ import { createVector } from '../utils/gameUtils';
 
 export class Player {
   private scene: BABYLON.Scene;
-  speed: number = 0.3;
+  speed: number = 0.15;
   playerMesh!: BABYLON.Mesh;
   actionTriggerBox!: BABYLON.Mesh;
   id: string;
@@ -20,6 +20,7 @@ export class Player {
       this.scene
     );
     this.playerMesh.checkCollisions = true;
+    this.playerMesh.position = position;
 
     // This mesh is used to trigger actions on intersection
     this.actionTriggerBox = BABYLON.MeshBuilder.CreateBox('collider', { size: 1 }, this.scene);

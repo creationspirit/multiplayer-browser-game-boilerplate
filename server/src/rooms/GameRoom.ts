@@ -4,6 +4,10 @@ import { StateHandler } from './StateHandler';
 import { PlayerState } from './state/PlayerState';
 import { World } from '../game/World';
 import { createVector } from '../utils/gameUtils';
+import { questionAPI, generateJWT } from '../config/requests';
+import { AxiosResponse } from 'axios';
+
+import { LEVEL_CONFIG_MOCK as LEVEL } from '../config/mocks';
 
 export enum MessageType {
   LVL_INIT = 'LVL_INIT',
@@ -21,6 +25,8 @@ export class GameRoom extends Room<StateHandler> {
     this.world = new World();
     console.log('world init');
     this.world.init(LEVEL);
+    console.log('world is initialized');
+    this.getQuestions();
 
     this.setSimulationInterval(() => this.onUpdate());
     this.setState(new StateHandler());
@@ -47,6 +53,7 @@ export class GameRoom extends Room<StateHandler> {
       LEVEL.spawnPoint.z
     );
     this.state.addPlayer(client.sessionId, player);
+    console.log(`player ${client.sessionId} joined.`);
   }
 
   // When a client sends a message
@@ -73,155 +80,17 @@ export class GameRoom extends Room<StateHandler> {
 
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
   onDispose() {}
-}
 
-export const LEVEL = {
-  id: 'level1',
-  corridors: [
-    {
-      type: 'Corridor4',
-      position: { x: 0, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 9, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: -9, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 0, y: 0, z: 9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 0, y: 0, z: -9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 9, y: 0, z: -18 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 9, y: 0, z: 18 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: -9, y: 0, z: 18 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: -9, y: 0, z: -18 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 18, y: 0, z: 9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: -18, y: 0, z: 9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: -18, y: 0, z: -9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'Corridor',
-      position: { x: 18, y: 0, z: -9 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'CorridorT',
-      position: { x: 18, y: 0, z: 0 },
-      rotation: { x: 0, y: Math.PI, z: 0 },
-    },
-    {
-      type: 'CorridorT',
-      position: { x: -18, y: 0, z: 0 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'CorridorT',
-      position: { x: 0, y: 0, z: 18 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'CorridorT',
-      position: { x: 0, y: 0, z: -18 },
-      rotation: { x: 0, y: -Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'CorridorL',
-      position: { x: 18, y: 0, z: 18 },
-      rotation: { x: 0, y: Math.PI / 2, z: 0 },
-    },
-    {
-      type: 'CorridorL',
-      position: { x: -18, y: 0, z: 18 },
-      rotation: { x: 0, y: 0, z: 0 },
-    },
-    {
-      type: 'CorridorL',
-      position: { x: 18, y: 0, z: -18 },
-      rotation: { x: 0, y: Math.PI, z: 0 },
-    },
-    {
-      type: 'CorridorL',
-      position: { x: -18, y: 0, z: -18 },
-      rotation: { x: 0, y: -Math.PI / 2, z: 0 },
-    },
-  ],
-  pickups: [
-    {
-      id: 'pickup1',
-      position: { x: 0, y: 0, z: 0 },
-    },
-    {
-      id: 'pickup2',
-      position: { x: 18, y: 0, z: 18 },
-    },
-    {
-      id: 'pickup3',
-      position: { x: -18, y: 0, z: 18 },
-    },
-    {
-      id: 'pickup4',
-      position: { x: -18, y: 0, z: -18 },
-    },
-    {
-      id: 'pickup5',
-      position: { x: 18, y: 0, z: -18 },
-    },
-  ],
-  lights: [
-    {
-      id: 'pointLight1',
-      position: { x: 0, y: 2.4, z: 0 },
-      intensity: 1,
-    },
-    {
-      id: 'pointLight2',
-      position: { x: 18, y: 2.4, z: 18 },
-      intensity: 0.3,
-    },
-    {
-      id: 'pointLight3',
-      position: { x: -18, y: 2.4, z: -18 },
-      intensity: 0.3,
-    },
-  ],
-  spawnPoint: { x: 9, y: 2, z: 0 },
-};
+  async getQuestions() {
+    let questions;
+    try {
+      questions = await questionAPI.get('/question', {
+        headers: { Authorization: generateJWT() },
+        params: { n: LEVEL.pickups.length },
+      });
+    } catch (e) {
+      console.log('Unable to fetch questions', e);
+    }
+    console.log((questions as AxiosResponse).data);
+  }
+}
