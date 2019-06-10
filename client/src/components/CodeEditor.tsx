@@ -13,6 +13,7 @@ export interface ICodeEditorProps {
   question: any;
   onCancel: () => void;
   onSubmit: () => void;
+  onCollectReward: () => void;
 }
 
 class CodeEditor extends Component<ICodeEditorProps, {}> {
@@ -83,7 +84,7 @@ class CodeEditor extends Component<ICodeEditorProps, {}> {
           </button>
           {(question.status === QuestionStatus.PARTIAL ||
             question.status === QuestionStatus.SOLVED) && (
-            <button className="ui orange right floated button">
+            <button className="ui orange right floated button" onClick={this.props.onCollectReward}>
               <i className="icon gift" />
               Collect reward
             </button>

@@ -6,6 +6,7 @@ import { Game } from '../Game';
 export const PLAYER_MOVEMENT: string = 'move';
 export const SOLUTION_UPDATE: string = 'supd';
 export const SOLVE_ATTEMPT: string = 'solv';
+export const COLLECT: string = 'coll';
 
 export class RouterService {
   client: Colyseus.Client;
@@ -44,7 +45,16 @@ export class RouterService {
           new BABYLON.Vector3(state.questions[key].x, 0.2, state.questions[key].y)
         );
       });
+      game.timer.text = state.timer;
     });
+
+    this.room.state.onChange = (changes: any) => {
+      changes.forEach((change: any) => {
+        if (change.field === 'timer') {
+          game.timer.text = change.value;
+        }
+      });
+    };
 
     this.room.state.questions.onAdd = (question: any, key: string) => {
       // console.log(question, 'has been added at', key);
@@ -93,6 +103,13 @@ export class RouterService {
   sendSolveAttempt(id: string) {
     this.room.send({
       type: SOLVE_ATTEMPT,
+      data: { id },
+    });
+  }
+
+  sendCollectReward(id: string) {
+    this.room.send({
+      type: COLLECT,
       data: { id },
     });
   }

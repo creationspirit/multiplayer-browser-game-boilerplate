@@ -14,24 +14,34 @@ export enum MessageType {
   MOVE = 'move',
   SOLUTION_UPDATE = 'supd',
   SOLVE_ATTEMPT = 'solv',
+  COLLECT = 'coll',
 }
+
+// this should be on metadata for onInit method
+const TIME: number = 30 * 60000; // 30 min
 
 // ALL client.sessionId SHOULD BE CHANGED TO client.id IN A PRODUCTION ENVIRONMENT
 export class GameRoom extends Room<StateHandler> {
   maxClients = 4;
 
   private world!: World;
+  private timer!: number;
 
   // When room is initialized
   onInit(options: any) {
     this.world = new World();
-    console.log('world init');
+    this.timer = TIME;
     this.world.init(LEVEL);
     console.log('world is initialized');
     this.getQuestions();
 
     this.setSimulationInterval(() => this.onUpdate());
-    this.setState(new StateHandler());
+    this.setState(new StateHandler(TIME));
+
+    this.clock.setInterval(() => {
+      this.timer = this.timer - 1000;
+      this.state.updateTimer(this.timer);
+    }, 1000);
   }
 
   // Checks if a new client is allowed to join. (default: `return true`)
@@ -73,6 +83,10 @@ export class GameRoom extends Room<StateHandler> {
 
     if (message.type === MessageType.SOLVE_ATTEMPT) {
       this.solveQuestion(data.id);
+    }
+
+    if (message.type === MessageType.COLLECT) {
+      const reward = this.state.questions[data.id].calculateReward();
     }
   }
 

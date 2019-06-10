@@ -35,6 +35,7 @@ export class Game {
   private rivals: { [id: string]: Rival } = {};
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
+  timer!: GUI.TextBlock;
 
   private advancedTexture: GUI.AdvancedDynamicTexture;
   private assetsManager: BABYLON.AssetsManager;
@@ -62,6 +63,7 @@ export class Game {
     this.area = new Area(this.scene);
 
     this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui', true, this.scene);
+    this.timer = this.createTimerGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
     // Store references to react state callbacks
@@ -220,5 +222,30 @@ export class Game {
     newPickup.init(this.lights, position);
     this.setupPickupActions(newPickup);
     this.pickups[newPickup.id] = newPickup;
+  }
+
+  createTimerGUI() {
+    const label = new GUI.Rectangle(`timer_rectangle`);
+    label.background = 'black';
+    label.paddingTop = 10;
+    label.alpha = 0.6;
+    label.cornerRadius = 20;
+    label.width = 0.06;
+    label.height = 0.05;
+    label.thickness = 1;
+    label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const textBlock = new GUI.TextBlock();
+    textBlock.resizeToFit = true;
+    textBlock.text = '30:00';
+    textBlock.fontSize = 36;
+    textBlock.fontStyle = 'bold';
+    textBlock.color = 'white';
+    label.addControl(textBlock);
+
+    this.advancedTexture.addControl(label);
+
+    return textBlock;
   }
 }

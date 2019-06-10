@@ -52,6 +52,10 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
     this.game.router.sendSolveAttempt((this.game.player.inSolvingAreaOf as Pickup).id);
   };
 
+  onCollectReward = () => {
+    this.game.router.sendCollectReward((this.game.player.inSolvingAreaOf as Pickup).id);
+  };
+
   render() {
     return (
       <div>
@@ -67,6 +71,7 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
             question={this.state.question}
             onCancel={this.removeTaskInProgress}
             onSubmit={this.onSubmit}
+            onCollectReward={this.onCollectReward}
           />
         )}
       </div>
