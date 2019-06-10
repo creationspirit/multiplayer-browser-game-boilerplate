@@ -77,11 +77,11 @@ export class World {
 
     this.assetsManager.onFinish = tasks => {
       this.area.init(levelConfig.corridors, this.prefabs);
-      levelConfig.pickups.forEach((pickupConfig: any) => {
-        const newPickup = new Pickup(this.scene, pickupConfig.id);
-        newPickup.init(createVector(pickupConfig.position));
-        this.pickups[newPickup.id] = newPickup;
-      });
+      // levelConfig.pickups.forEach((pickupConfig: any) => {
+      //   const newPickup = new Pickup(this.scene, pickupConfig.id);
+      //   newPickup.init(createVector(pickupConfig.position));
+      //   this.pickups[newPickup.id] = newPickup;
+      // });
 
       this.scene.executeWhenReady(() => {
         console.log('scene ready');
@@ -104,6 +104,20 @@ export class World {
     const player: Player = this.players[id];
     if (player !== undefined) {
       player.playerMesh.dispose();
+    }
+    delete this.players[id];
+  }
+
+  addPickup(id: number, position: BABYLON.Vector3) {
+    const question = new Pickup(this.scene, id);
+    question.init(position);
+    this.pickups[id] = question;
+  }
+
+  removePickup(id: number) {
+    const pickup: Pickup = this.pickups[id];
+    if (pickup !== undefined) {
+      pickup.boundingBox.dispose();
     }
     delete this.players[id];
   }

@@ -4,6 +4,8 @@ import * as BABYLON from 'babylonjs';
 import { Game } from '../Game';
 
 export const PLAYER_MOVEMENT: string = 'move';
+export const SOLUTION_UPDATE: string = 'supd';
+export const SOLVE_ATTEMPT: string = 'solv';
 
 export class RouterService {
   client: Colyseus.Client;
@@ -11,16 +13,6 @@ export class RouterService {
 
   constructor(client: Colyseus.Client) {
     this.client = client;
-    // this.room.state.players.onAdd = (player: any, sessionId: any) => {
-    //   // console.log(player, 'has been added at', sessionId);
-    // };
-
-    // this.room.state.players.onRemove = (player: any, sessionId: any) => {
-    //   // console.log(player, 'has been removed from', sessionId);
-    // };
-    // this.room.onStateChange.add((state: any) => {
-    //   console.log('the room state has been updated:', state);
-    // });
   }
 
   connect(game: Game, roomId: string = 'game') {
@@ -32,31 +24,50 @@ export class RouterService {
         console.log(message);
         if (message.type === 'LVL_INIT') {
           game.initGameStateAndRun(message.data);
+          this.setupMessageListeners(game);
         }
       });
+    });
+  }
 
-      // this.room.state.players.onChange = (player: any, sessionId: any) => {
-      //   console.log(player, 'has been changed, ', sessionId);
-      // };
+  setupMessageListeners(game: Game) {
+    // recieve game state for the first time
+    this.room.onStateChange.addOnce((state: any) => {
+      Object.keys(state.players).forEach((key: string) => {
+        if (key !== this.room.sessionId) {
+          game.addPlayer(key, new BABYLON.Vector3(state.players[key].x, 0.2, state.players[key].y));
+        }
+      });
+      Object.keys(state.questions).forEach((key: string) => {
+        game.addPickup(
+          key,
+          new BABYLON.Vector3(state.questions[key].x, 0.2, state.questions[key].y)
+        );
+      });
+    });
 
-      this.room.state.players.onAdd = (player: any, key: string) => {
+    this.room.state.questions.onAdd = (question: any, key: string) => {
+      // console.log(question, 'has been added at', key);
+      game.addPickup(key, new BABYLON.Vector3(question.x, 0.2, question.y));
+    };
+
+    this.room.state.players.onAdd = (player: any, key: string) => {
+      if (key !== this.room.sessionId) {
         console.log(player, 'has been added at', key);
         game.addPlayer(key, new BABYLON.Vector3(player.x, 0.2, player.y));
+      }
+    };
 
-        // player.onChange = (changes: any) => {
-        //   changes.forEach((change: any) => {
-        //     console.log(change.field);
-        //     console.log(change.value);
-        //     console.log(change.previousValue);
-        //   });
-        // };
-      };
+    this.room.state.players.onChange = (player: any, key: string) => {
+      // console.log(player, 'have changes at', key);
+      game.updatePlayer(key, new BABYLON.Vector3(player.x, 0.2, player.y));
+    };
 
-      this.room.state.players.onChange = (player: any, key: string) => {
-        // console.log(player, "have changes at", key);
-        game.updatePlayer(key, new BABYLON.Vector3(player.x, 0.2, player.y));
-      };
-    });
+    this.room.state.questions.onChange = (question: any, key: string) => {
+      if (game.player.inSolvingAreaOf && parseInt(game.player.inSolvingAreaOf.id) === question.id) {
+        game.setQuestion(question);
+      }
+    };
   }
 
   sendMovement(
@@ -69,6 +80,20 @@ export class RouterService {
     this.room.send({
       type: PLAYER_MOVEMENT,
       data: { direction, keyUp, keyDown, keyLeft, keyRight },
+    });
+  }
+
+  sendSolutionUpdate(id: string, sourceCode: string) {
+    this.room.send({
+      type: SOLUTION_UPDATE,
+      data: { id, sourceCode },
+    });
+  }
+
+  sendSolveAttempt(id: string) {
+    this.room.send({
+      type: SOLVE_ATTEMPT,
+      data: { id },
     });
   }
 }

@@ -1,9 +1,6 @@
 import { Schema, type, MapSchema } from '@colyseus/schema';
 
 export class TestState extends Schema {
-  @type('number')
-  id: number;
-
   @type('string')
   input: string;
 
@@ -13,11 +10,19 @@ export class TestState extends Schema {
   @type('string')
   current: string;
 
-  constructor(id: number, input: string, output: string) {
+  @type('boolean')
+  isCorrect: boolean;
+
+  constructor(input: string, output: string) {
     super();
-    this.id = id;
     this.input = input;
     this.output = output;
     this.current = '';
+    this.isCorrect = false;
+  }
+
+  updateCurrent(outcome: any) {
+    this.current = outcome.output;
+    this.isCorrect = outcome.isCorrect;
   }
 }
