@@ -1,9 +1,16 @@
-import { Schema, type, MapSchema } from '@colyseus/schema';
+import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { TestState } from './TestState';
 
+export enum QuestionStatus {
+  STANDARD = 'std',
+  EVALUATE = 'eval',
+  SOLVED = 'solv',
+  PARTIAL = 'part',
+}
+
 export class QuestionState extends Schema {
-  @type('string')
-  id: string;
+  @type('number')
+  id: number;
 
   @type('number')
   x: number | undefined;
@@ -17,8 +24,14 @@ export class QuestionState extends Schema {
   @type('string')
   solution: string;
 
-  @type({ map: TestState })
-  tests = new MapSchema<TestState>();
+  @type([TestState])
+  tests = new ArraySchema<TestState>();
+
+  @type('number')
+  score: number;
+
+  @type('string')
+  status: string;
 
   constructor(data: any, x: number, y: number) {
     super();
@@ -27,11 +40,19 @@ export class QuestionState extends Schema {
     this.x = x;
     this.y = y;
     this.solution = '';
+    this.score = 0;
+    this.status = QuestionStatus.STANDARD;
     data.tests.forEach((testData: any) => this.addTest(testData));
   }
 
   addTest(testData: any) {
-    const newTest = new TestState(testData.id, testData.input, testData.output);
-    this.tests[testData.id] = newTest;
+    const newTest = new TestState(testData.input, testData.output);
+    this.tests.push(newTest);
+  }
+
+  calculateReward() {
+    const loc = this.solution.split(/\r\n|\r|\n/).length;
+    console.log(loc);
+    return loc * this.score;
   }
 }

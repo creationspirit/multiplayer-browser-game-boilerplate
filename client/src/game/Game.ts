@@ -31,24 +31,27 @@ export class Game {
 
   private prefabs: { [id: string]: BABYLON.Mesh } = {};
   private lights: Lights;
-  private player!: Player;
+  player!: Player;
   private rivals: { [id: string]: Rival } = {};
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
+  timer!: GUI.TextBlock;
 
   private advancedTexture: GUI.AdvancedDynamicTexture;
   private assetsManager: BABYLON.AssetsManager;
 
-  private router: RouterService;
+  router: RouterService;
 
   private setTaskInProgress: () => void;
   private removeTaskInProgress: () => void;
+  setQuestion: (question: any) => void;
 
   constructor(
     args: ISceneEventArgs,
     client: Colyseus.Client,
     setTaskInProgress: () => void,
-    removeTaskInProgress: () => void
+    removeTaskInProgress: () => void,
+    setQuestion: (question: any) => void
   ) {
     this.canvas = args.canvas as HTMLCanvasElement;
     this.engine = args.engine;
@@ -60,10 +63,13 @@ export class Game {
     this.area = new Area(this.scene);
 
     this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui', true, this.scene);
+    this.timer = this.createTimerGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
+    // Store references to react state callbacks
     this.setTaskInProgress = setTaskInProgress;
     this.removeTaskInProgress = removeTaskInProgress;
+    this.setQuestion = setQuestion;
   }
 
   private createMeshTask(taskId: string, fileName: string) {
@@ -118,7 +124,6 @@ export class Game {
     playerTask.onSuccess = task => this.storePlayerPrefab(task);
 
     this.assetsManager.onFinish = tasks => {
-      console.log(tasks);
       this.router.connect(this, 'game');
     };
   }
@@ -126,13 +131,9 @@ export class Game {
   initGameStateAndRun(levelConfig: any) {
     this.area.init(levelConfig.corridors, this.prefabs);
     this.lights.init(levelConfig.lights);
-    levelConfig.pickups.forEach((pickupConfig: any) => {
-      const newPickup = new Pickup(this.scene, pickupConfig.id, this.prefabs[PrefabID.PICKUP]);
-      newPickup.init(this.lights, createVector(pickupConfig.position));
-      this.pickups[newPickup.id] = newPickup;
-    });
     this.player = new Player(this.scene, this.router.room.sessionId);
     this.player.init(createVector(levelConfig.spawnPoint));
+    this.player.setupControls(this.scene.actionManager as BABYLON.ActionManager);
     this.setupPlayerActions();
     this.run();
   }
@@ -151,49 +152,53 @@ export class Game {
   }
 
   private setupPlayerActions() {
+    this.scene.actionManager.registerAction(
+      new BABYLON.ExecuteCodeAction(
+        {
+          trigger: BABYLON.ActionManager.OnKeyUpTrigger,
+          parameter: ' ',
+        },
+        () => {
+          this.setQuestion(
+            this.router.room.state.questions[(this.player.inSolvingAreaOf as Pickup).id]
+          );
+          this.player.isSolving = true;
+        },
+        new BABYLON.PredicateCondition(this.scene.actionManager as BABYLON.ActionManager, () => {
+          return !!this.player.inSolvingAreaOf;
+        })
+      )
+    );
+  }
+
+  private setupPickupActions(pickup: Pickup) {
     const actionManager = this.player.getActionManager();
-    Object.keys(this.pickups).forEach(key => {
-      actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(
-          {
-            trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
-            parameter: this.pickups[key].solveAreaBox,
-          },
-          () => {
-            this.advancedTexture.addControl(this.pickups[key].label);
-            this.pickups[key].label.linkWithMesh(this.pickups[key].pickupMesh);
-            this.player.inSolvingAreaOf = this.pickups[key];
-          }
-        )
-      );
-      actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(
-          {
-            trigger: BABYLON.ActionManager.OnIntersectionExitTrigger,
-            parameter: this.pickups[key].solveAreaBox,
-          },
-          () => {
-            this.advancedTexture.removeControl(this.pickups[key].label);
-            this.player.inSolvingAreaOf = undefined;
-            this.removeTaskInProgress();
-          }
-        )
-      );
-      this.scene.actionManager.registerAction(
-        new BABYLON.ExecuteCodeAction(
-          {
-            trigger: BABYLON.ActionManager.OnKeyUpTrigger,
-            parameter: ' ',
-          },
-          () => {
-            this.setTaskInProgress();
-          },
-          new BABYLON.PredicateCondition(this.scene.actionManager as BABYLON.ActionManager, () => {
-            return !!this.player.inSolvingAreaOf;
-          })
-        )
-      );
-    });
+    actionManager.registerAction(
+      new BABYLON.ExecuteCodeAction(
+        {
+          trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
+          parameter: pickup.solveAreaBox,
+        },
+        () => {
+          this.advancedTexture.addControl(pickup.label);
+          pickup.label.linkWithMesh(pickup.pickupMesh);
+          this.player.inSolvingAreaOf = pickup;
+        }
+      )
+    );
+    actionManager.registerAction(
+      new BABYLON.ExecuteCodeAction(
+        {
+          trigger: BABYLON.ActionManager.OnIntersectionExitTrigger,
+          parameter: pickup.solveAreaBox,
+        },
+        () => {
+          this.advancedTexture.removeControl(pickup.label);
+          this.player.inSolvingAreaOf = undefined;
+          this.removeTaskInProgress();
+        }
+      )
+    );
   }
 
   addPlayer(key: string, position: BABYLON.Vector3) {
@@ -210,5 +215,37 @@ export class Game {
     if (this.rivals[key]) {
       this.rivals[key].update(position);
     }
+  }
+
+  addPickup(id: string, position: BABYLON.Vector3) {
+    const newPickup = new Pickup(this.scene, id, this.prefabs[PrefabID.PICKUP]);
+    newPickup.init(this.lights, position);
+    this.setupPickupActions(newPickup);
+    this.pickups[newPickup.id] = newPickup;
+  }
+
+  createTimerGUI() {
+    const label = new GUI.Rectangle(`timer_rectangle`);
+    label.background = 'black';
+    label.paddingTop = 10;
+    label.alpha = 0.6;
+    label.cornerRadius = 20;
+    label.width = 0.06;
+    label.height = 0.05;
+    label.thickness = 1;
+    label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const textBlock = new GUI.TextBlock();
+    textBlock.resizeToFit = true;
+    textBlock.text = '30:00';
+    textBlock.fontSize = 36;
+    textBlock.fontStyle = 'bold';
+    textBlock.color = 'white';
+    label.addControl(textBlock);
+
+    this.advancedTexture.addControl(label);
+
+    return textBlock;
   }
 }

@@ -2,12 +2,12 @@ import * as BABYLON from 'babylonjs';
 
 export class Pickup {
   private scene: BABYLON.Scene;
-  id: string;
+  id: number;
   boundingBox!: BABYLON.Mesh;
   solveAreaBox!: BABYLON.Mesh;
   particleSet!: BABYLON.ParticleSystemSet;
 
-  constructor(scene: BABYLON.Scene, id: string) {
+  constructor(scene: BABYLON.Scene, id: number) {
     this.scene = scene;
     this.id = id;
   }
@@ -28,5 +28,6 @@ export class Pickup {
       this.scene
     );
     this.solveAreaBox.position = position;
+    this.solveAreaBox.parent = this.boundingBox;
   }
 }

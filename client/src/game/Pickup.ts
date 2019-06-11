@@ -15,7 +15,7 @@ export class Pickup {
   constructor(scene: BABYLON.Scene, id: string, prefabMesh: BABYLON.Mesh) {
     this.scene = scene;
     this.id = id;
-    this.pickupMesh = prefabMesh.clone(this.id);
+    this.pickupMesh = prefabMesh.clone();
     this.pickupMesh.isVisible = false;
   }
 

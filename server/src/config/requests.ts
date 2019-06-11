@@ -6,7 +6,6 @@ export const questionAPI = axios.create({
 });
 
 export const generateJWT = () => {
-  console.log(process.env.PROVIDER, process.env.CONSUMER, process.env.TASK_API_SECRET);
   const token = jwt.sign(
     { aud: process.env.PROVIDER, iss: process.env.CONSUMER },
     process.env.TASK_API_SECRET as jwt.Secret,

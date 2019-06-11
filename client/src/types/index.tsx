@@ -1,5 +1,9 @@
-// all application types go here
+import * as Colyseus from 'colyseus.js';
 
-export interface IStoreState {
-  dummy: string;
+export interface IClientState {
+  client: Colyseus.Client | null;
+}
+
+export interface IRootState {
+  gameClient: IClientState;
 }
