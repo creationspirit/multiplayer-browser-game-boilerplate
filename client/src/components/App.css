@@ -36,3 +36,11 @@ body {
 td {
   white-space: pre;
 }
+
+.item.selected {
+  padding-left: 1% !important;
+  background-color: rgb(226, 226, 226);
+  -webkit-box-shadow: 0px 0px 6px 0px rgb(158, 158, 158);
+  -moz-box-shadow: 0px 0px 6px 0px rgba(189, 189, 189, 1);
+  box-shadow: 0px 0px 6px 0px rgba(189, 189, 189, 1);
+}

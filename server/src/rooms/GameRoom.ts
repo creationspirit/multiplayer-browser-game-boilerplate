@@ -44,10 +44,9 @@ export class GameRoom extends Room<StateHandler> {
     }, 1000);
   }
 
-  // Checks if a new client is allowed to join. (default: `return true`)
+  // Checks if a new client is allowed to join.
   requestJoin(options: any, isNew: boolean) {
-    return true;
-    // return options.create ? options.create && isNew : this.clients.length > 0;
+    return options.create ? options.create && isNew : this.clients.length > 0;
   }
 
   // Authorize client based on provided options before WebSocket handshake is complete

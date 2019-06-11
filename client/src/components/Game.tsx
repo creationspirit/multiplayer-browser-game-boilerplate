@@ -1,20 +1,21 @@
 import * as React from 'react';
 
-import * as BABYLON from 'babylonjs';
-import * as GUI from 'babylonjs-gui';
 import * as Colyseus from 'colyseus.js';
+import { connect } from 'react-redux';
 
 import CodeEditor from './CodeEditor';
 import BabylonScene, { ISceneEventArgs } from './Scene';
 import { RouterService } from '../game/routing/routerService';
 import { Game } from '../game/Game';
 import { Pickup } from '../game/Pickup';
+import { IRootState } from '../types';
 
 export interface IGameProps {
-  client: Colyseus.Client;
+  client: Colyseus.Client | null;
+  match: { params: { roomId: string } };
 }
 
-export default class PageWithScene extends React.Component<IGameProps, {}> {
+class PageWithScene extends React.Component<IGameProps> {
   state = { taskInProgress: false, question: null };
 
   private game!: Game;
@@ -22,7 +23,8 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
   onSceneMount = (args: ISceneEventArgs) => {
     this.game = new Game(
       args,
-      this.props.client,
+      this.props.client as Colyseus.Client,
+      this.props.match.params.roomId,
       this.setTaskInProgress,
       this.removeTaskInProgress,
       this.setQuestion
@@ -78,3 +80,14 @@ export default class PageWithScene extends React.Component<IGameProps, {}> {
     );
   }
 }
+
+const mapStateToProps = ({ gameClient }: IRootState) => {
+  return {
+    client: gameClient.client,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(PageWithScene);
