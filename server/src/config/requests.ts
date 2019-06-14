@@ -10,8 +10,19 @@ export const generateJWT = () => {
     { aud: process.env.PROVIDER, iss: process.env.CONSUMER },
     process.env.TASK_API_SECRET as jwt.Secret,
     {
+      // Every token will expire in 10 sec
       expiresIn: 10,
     }
   );
   return `Bearer ${token}`;
+};
+
+export const fetchUser = async (token: string) => {
+  const response = await questionAPI.get('/student/gameserverpassword', {
+    headers: {
+      'Game-Server-PWD': token,
+      Authorization: generateJWT(),
+    },
+  });
+  return response.data.student;
 };

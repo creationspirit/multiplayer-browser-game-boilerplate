@@ -1,6 +1,9 @@
-import dotenv from 'dotenv';
 // Load environment variables from .env file
+import dotenv from 'dotenv';
 dotenv.config();
+
+// Establish database connection
+import './config/db';
 
 import { Server } from 'colyseus';
 import { createServer } from 'http';

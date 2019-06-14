@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import morgan from 'morgan';
 
-import * as apiController from './controllers/api';
+import userController from './controllers/user';
 
 // Create Express server
 const app = express();
@@ -17,6 +17,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(morgan('combined'));
 
-app.get('/api', apiController.getApi);
+app.use('/users', userController);
 
 export default app;
