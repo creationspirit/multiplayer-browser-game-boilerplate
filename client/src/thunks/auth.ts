@@ -1,4 +1,4 @@
-import { loginError, loginSuccess, loginRequest, logout } from '../actions/auth';
+import { loginError, loginSuccess, loginRequest, logoutUser } from '../actions/auth';
 import { Dispatch } from 'redux';
 import { ThunkResult } from './index';
 import { gameAPI } from '../config/request';
@@ -17,6 +17,13 @@ export const login = (edgarToken: string): ThunkResult<void> => {
         dispatch(loginError('Login failed'));
       }
     }
+  };
+};
+
+export const logout = () => {
+  return async (dispatch: Dispatch) => {
+    localStorage.removeItem('token');
+    dispatch(logoutUser());
   };
 };
 

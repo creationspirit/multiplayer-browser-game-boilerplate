@@ -60,3 +60,31 @@ td {
     text-align: center !important;
   }
 }
+
+.exp-bar {
+  width: 200px !important;
+}
+
+.menu-header {
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+
+.loc-item {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: flex-start;
+  & > * {
+    margin-right: 20px !important;
+  }
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}

@@ -39,7 +39,7 @@ export function loginRequest(): ILoginRequest {
   };
 }
 
-export function logout(): ILogout {
+export function logoutUser(): ILogout {
   return {
     type: constants.LOGOUT,
   };

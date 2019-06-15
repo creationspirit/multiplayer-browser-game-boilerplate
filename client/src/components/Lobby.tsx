@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { IRootState } from '../types';
+import Navbar from './fragments/Navbar';
 
 export interface ILobbyProps {
   client: Client | null;
@@ -77,6 +78,7 @@ class Lobby extends Component<ILobbyProps> {
   render() {
     return (
       <div className="ui container">
+        <Navbar />
         <div className="ui raised segment">
           <h3 className="ui header">
             <i className="circular inverted users icon" />
