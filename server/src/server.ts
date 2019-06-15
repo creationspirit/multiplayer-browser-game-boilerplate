@@ -9,12 +9,10 @@ import { Server } from 'colyseus';
 import { createServer } from 'http';
 import { monitor } from '@colyseus/monitor';
 import errorHandler from 'errorhandler';
-import cors from 'cors';
 
 import app from './app';
 import { GameRoom } from './rooms/GameRoom';
 
-app.use(cors());
 /**
  * Error Handler. Provides full stack - remove for production
  */

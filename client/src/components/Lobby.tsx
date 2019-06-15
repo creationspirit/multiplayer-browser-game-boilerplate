@@ -20,12 +20,14 @@ class Lobby extends Component<ILobbyProps> {
   }
 
   getAvailableRooms = () => {
-    (this.props.client as Client).getAvailableRooms('game', (rooms, err) => {
-      if (err) {
-        return console.error(err);
-      }
-      this.setState({ availableRooms: rooms });
-    });
+    if (this.props.client) {
+      (this.props.client as Client).getAvailableRooms('game', (rooms, err) => {
+        if (err) {
+          return console.error(err);
+        }
+        this.setState({ availableRooms: rooms });
+      });
+    }
   };
 
   componentWillUnmount() {

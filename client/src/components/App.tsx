@@ -1,49 +1,63 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, RouteProps } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import Game from './Game';
 import Lobby from './Lobby';
+import Login from './Login';
+import { ProtectedRoute, IProtectedRouteProps } from './fragments/ProtectedRoute';
 import { IRootState } from '../types';
 import { connectToGameClient } from '../thunks';
+import { fetchUserData } from '../thunks/auth';
 import * as Colyseus from 'colyseus.js';
 
-import './App.css';
+import './App.scss';
 
 interface IAppProps {
   client: Colyseus.Client | null;
-  connectToClient: () => void;
+  user: {} | null;
+  connectToGameClient: () => void;
+  fetchUserData: () => void;
 }
 
 class App extends Component<IAppProps> {
-  // This should be refactored in the future, endpoint should be dynamic
-  // state = { gameClient: new Colyseus.Client('ws://localhost:4000') };
-  canRender = false;
-  state = { canRender: false };
-
   componentDidMount() {
-    this.props.connectToClient();
+    this.props.fetchUserData();
   }
 
   componentDidUpdate(prevProps: IAppProps) {
-    if (this.props.client && !prevProps.client) {
-      console.log(this.props.client);
-      console.log('can render now');
-      this.setState({ canRender: true });
+    console.log('update');
+    if (this.props.user && !this.props.client) {
+      this.props.connectToGameClient();
     }
   }
 
   render() {
-    if (!this.state.canRender) {
-      return <div>Loading...</div>;
-    }
+    const { user } = this.props;
+
+    const defaultProtectedRouteProps: IProtectedRouteProps = {
+      isAuthenticated: !!user,
+      authenticationPath: '/login',
+    };
+
     return (
       <div className="App">
         <BrowserRouter>
           <div>
             <Switch>
-              <Route path="/" exact={true} component={Lobby} />
-              <Route path="/game/:roomId" exact={true} component={Game} />
+              <Route path="/login" exact={true} component={Login} />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/"
+                exact={true}
+                component={Lobby}
+              />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/game/:roomId"
+                exact={true}
+                component={Game}
+              />
             </Switch>
           </div>
         </BrowserRouter>
@@ -52,13 +66,14 @@ class App extends Component<IAppProps> {
   }
 }
 
-const mapStateToProps = ({ gameClient }: IRootState) => {
+const mapStateToProps = ({ gameClient, auth }: IRootState) => {
   return {
+    user: auth.user,
     client: gameClient.client,
   };
 };
 
 export default connect(
   mapStateToProps,
-  { connectToClient: connectToGameClient }
+  { connectToGameClient, fetchUserData }
 )(App);
