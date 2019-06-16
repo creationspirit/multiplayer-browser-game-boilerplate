@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
 import jwt from 'jsonwebtoken';
+
+import { UserStats } from './UserStats';
 
 type edgarResponse = {
   id: number;
@@ -26,6 +27,9 @@ export class User {
 
   @Column({ length: 50 })
   email!: string;
+
+  @OneToOne(type => UserStats, 'user', { cascade: true, eager: true })
+  stats!: UserStats;
 
   loadFromEdgarResponse(user: edgarResponse) {
     this.edgarId = user.id;

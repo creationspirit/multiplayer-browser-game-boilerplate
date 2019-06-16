@@ -10,7 +10,14 @@ export interface IAuthState {
   error: string | null;
 }
 
+export interface IStageState {
+  loading: boolean;
+  stages: [];
+  error: string | null;
+}
+
 export interface IRootState {
   gameClient: IClientState;
   auth: IAuthState;
+  stages: IStageState;
 }

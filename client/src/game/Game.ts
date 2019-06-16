@@ -50,6 +50,7 @@ export class Game {
     args: ISceneEventArgs,
     client: Colyseus.Client,
     roomId: string,
+    roomData: any,
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
     setQuestion: (question: any) => void
@@ -58,7 +59,7 @@ export class Game {
     this.engine = args.engine;
     this.scene = args.scene;
 
-    this.router = new RouterService(client, roomId);
+    this.router = new RouterService(client, roomId, roomData);
 
     this.lights = new Lights(this.scene);
     this.area = new Area(this.scene);

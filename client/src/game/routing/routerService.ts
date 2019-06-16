@@ -14,12 +14,13 @@ export class RouterService {
   roomId: string;
   options: any;
 
-  constructor(client: Colyseus.Client, roomId: string) {
+  constructor(client: Colyseus.Client, roomId: string, roomData: any) {
     this.client = client;
     this.roomId = roomId === 'new' ? 'game' : roomId;
-    this.options = {};
+    this.options = { token: localStorage.getItem('token') };
     if (roomId === 'new') {
       this.options.create = true;
+      this.options.roomData = roomData;
     }
   }
 

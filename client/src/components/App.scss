@@ -88,3 +88,18 @@ td {
   justify-content: space-between;
   align-items: flex-start;
 }
+
+.create-room-segment {
+  & .progress {
+    margin: 0 0 0.5em 0 !important;
+  }
+}
+
+.room-wizard-mode,
+.room-wizard-difficulty {
+  margin: 1.5em 0;
+}
+
+.stage-selected {
+  border: 1px solid #f2711c !important;
+}

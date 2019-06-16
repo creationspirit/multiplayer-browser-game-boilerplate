@@ -3,6 +3,7 @@ import * as constants from '../constants';
 import * as Colyseus from 'colyseus.js';
 
 import { ILoginSuccess, ILoginError, ILoginRequest, ILogout } from './auth';
+import { IStagesError, IStagesLoading, IStagesSuccess } from './stages';
 
 export interface IAddGameClient extends Action {
   type: constants.ADD_GAME_CLIENT;
@@ -19,7 +20,10 @@ export type IActions =
   | ILoginSuccess
   | ILoginError
   | ILoginRequest
-  | ILogout;
+  | ILogout
+  | IStagesError
+  | IStagesSuccess
+  | IStagesLoading;
 
 export function addGameClient(client: Colyseus.Client): IAddGameClient {
   return {

@@ -10,7 +10,7 @@ export const msToMinSec = (millis: number) => {
   return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
-export const getRandomArrayElements = (arr: [any], n: number) => {
+export const getRandomArrayElements = (arr: any[], n: number): any[] => {
   const result = new Array(n);
   let len = arr.length;
   const taken = new Array(len);

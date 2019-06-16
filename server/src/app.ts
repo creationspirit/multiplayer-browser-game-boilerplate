@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import userController from './controllers/user';
+import stageController from './controllers/stage';
 
 // Create Express server
 const app = express();
@@ -20,5 +21,6 @@ app.use(morgan('combined'));
 app.use(cors());
 
 app.use('/users', userController);
+app.use('/stages', stageController);
 
 export default app;

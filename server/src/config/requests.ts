@@ -26,3 +26,12 @@ export const fetchUser = async (token: string) => {
   });
   return response.data.student;
 };
+
+export const fetchExercises = async () => {
+  const response = await questionAPI.get('/exercise', {
+    headers: {
+      Authorization: generateJWT(),
+    },
+  });
+  return response.data.exercises;
+};

@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm';
 
 import { auth } from '../middleware/auth';
 import { User } from '../models/User';
+import { UserStats } from '../models/UserStats';
 import { fetchUser } from '../config/requests';
 
 const router = Router();
@@ -17,6 +18,13 @@ router.post('/login', async (req: Request, res: Response) => {
       user = new User();
     }
     user.loadFromEdgarResponse(edgarUser);
+    if (!user.stats) {
+      const stats = new UserStats();
+      stats.experience = 0;
+      stats.level = 1;
+      stats.loc = 0;
+      user.stats = stats;
+    }
     await repository.save(user);
     const token = await user.generateAuthToken();
     res.send({ user, token });

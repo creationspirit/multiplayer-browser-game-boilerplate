@@ -7,24 +7,26 @@ import { logout } from '../../thunks/auth';
 
 interface INavbarProps {
   logout: () => void;
+  user: any;
 }
 
 class Navbar extends Component<INavbarProps> {
   render() {
+    const { user } = this.props;
     return (
       <div className="navbar">
         <div className="navbar-left">
           <h4 className="ui header">
             <i className="icon terminal" />
             <div className="content">
-              4332145
+              {user.stats.loc}
               <div className="sub header">Lines of code</div>
             </div>
           </h4>
 
           <div className="exp-bar">
-            <Progress percent={30} indicating={true} progress={true} size="small">
-              Level 1
+            <Progress value={user.stats.experience} indicating={true} progress={true} size="small">
+              Level {user.stats.level}
             </Progress>
           </div>
         </div>
@@ -40,8 +42,8 @@ class Navbar extends Component<INavbarProps> {
   }
 }
 
-const mapStateToProps = ({ gameClient }: IRootState) => {
-  return {};
+const mapStateToProps = ({ auth }: IRootState) => {
+  return { user: auth.user };
 };
 
 export default connect(

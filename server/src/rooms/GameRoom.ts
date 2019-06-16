@@ -1,11 +1,14 @@
 import { Room, Client } from 'colyseus';
+import { getRepository } from 'typeorm';
+import jwt from 'jsonwebtoken';
 
 import { StateHandler } from './StateHandler';
 import { PlayerState } from './state/PlayerState';
 import { QuestionStatus } from './state/QuestionState';
 import { World } from '../game/World';
-import { createVector } from '../utils/gameUtils';
+import { createVector, getRandomArrayElements } from '../utils/gameUtils';
 import { questionAPI, generateJWT } from '../config/requests';
+import { User } from '../models/User';
 
 import { LEVEL_CONFIG_MOCK as LEVEL } from '../config/mocks';
 
@@ -17,6 +20,11 @@ export enum MessageType {
   COLLECT = 'coll',
 }
 
+interface IConfig {
+  stage: number;
+  difficulty: number;
+}
+
 // this should be on metadata for onInit method
 const TIME: number = 30 * 60000; // 30 min
 
@@ -26,13 +34,16 @@ export class GameRoom extends Room<StateHandler> {
 
   private world!: World;
   private timer!: number;
+  private config!: IConfig;
 
   // When room is initialized
   onInit(options: any) {
+    this.config = options.roomData;
+    console.log('Creating a room with configuration:', options);
     this.world = new World();
     this.timer = TIME;
     this.world.init(LEVEL);
-    console.log('world is initialized');
+    console.log('World is initialized');
     this.getQuestions();
 
     this.setSimulationInterval(() => this.onUpdate());
@@ -50,8 +61,16 @@ export class GameRoom extends Room<StateHandler> {
   }
 
   // Authorize client based on provided options before WebSocket handshake is complete
-  onAuth(options: any) {
-    return true;
+  async onAuth(options: any) {
+    try {
+      const decoded = await jwt.verify(options.token, process.env.JWT_SECRET as string);
+      const user = await getRepository(User).findOneOrFail({
+        edgarId: (decoded as { _id: number })._id,
+      });
+      return user ? user : false;
+    } catch (e) {
+      return false;
+    }
   }
 
   // When client successfully join the room
@@ -106,17 +125,24 @@ export class GameRoom extends Room<StateHandler> {
   onDispose() {}
 
   async getQuestions() {
-    let questions;
+    let response;
     try {
-      questions = await questionAPI.get('/question', {
+      response = await questionAPI.get(`/exercise/${this.config.stage}/questions`, {
         headers: { Authorization: generateJWT() },
-        params: { n: LEVEL.pickups.length },
       });
     } catch (e) {
       return console.log('Unable to fetch questions', e);
     }
-    // console.log((questions as AxiosResponse).data);
-    questions.data.forEach((questionData: any, index: number) => {
+    let questions: any[] = response.data.data.questions;
+
+    // filter only questions of desired difficulty
+    questions = questions.filter((q: any) => {
+      return q.id_difficulty_level === this.config.difficulty;
+    });
+    // choose random questions from a pool of questions
+    questions = getRandomArrayElements(questions, LEVEL.pickups.length);
+
+    questions.forEach((questionData: any, index: number) => {
       this.world.addPickup(questionData.id, createVector(LEVEL.pickups[index].position));
       this.state.addQuestion(
         questionData,

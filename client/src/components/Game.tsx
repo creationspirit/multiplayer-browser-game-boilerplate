@@ -13,6 +13,8 @@ import { IRootState } from '../types';
 export interface IGameProps {
   client: Colyseus.Client | null;
   match: { params: { roomId: string } };
+  user: any;
+  location: { state: any };
 }
 
 class PageWithScene extends React.Component<IGameProps> {
@@ -21,10 +23,13 @@ class PageWithScene extends React.Component<IGameProps> {
   private game!: Game;
 
   onSceneMount = (args: ISceneEventArgs) => {
+    console.log(this.props.location);
+
     this.game = new Game(
       args,
       this.props.client as Colyseus.Client,
       this.props.match.params.roomId,
+      this.props.location.state,
       this.setTaskInProgress,
       this.removeTaskInProgress,
       this.setQuestion
@@ -81,9 +86,10 @@ class PageWithScene extends React.Component<IGameProps> {
   }
 }
 
-const mapStateToProps = ({ gameClient }: IRootState) => {
+const mapStateToProps = ({ gameClient, auth }: IRootState) => {
   return {
     client: gameClient.client,
+    user: auth.user,
   };
 };
 

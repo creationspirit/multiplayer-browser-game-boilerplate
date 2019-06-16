@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { IRootState } from '../types';
 import Navbar from './fragments/Navbar';
+import RoomWizard from './fragments/RoomWizard';
 
 export interface ILobbyProps {
   client: Client | null;
@@ -41,7 +42,7 @@ class Lobby extends Component<ILobbyProps> {
 
   renderAvailableRooms() {
     if (this.state.availableRooms.length === 0) {
-      return <div className="item">No rooms available</div>;
+      return <div className="item">It seems no one is playing at the moment.</div>;
     }
     return this.state.availableRooms.map((room: any) => {
       const selected = room.roomId === this.state.selectedRoom;
@@ -69,12 +70,6 @@ class Lobby extends Component<ILobbyProps> {
     });
   }
 
-  create = () => {
-    if (this.props.client) {
-      this.props.client.join('game', { create: true });
-    }
-  };
-
   render() {
     return (
       <div className="ui container">
@@ -89,11 +84,7 @@ class Lobby extends Component<ILobbyProps> {
           </h3>
           <div className="ui divided list">{this.renderAvailableRooms()}</div>
         </div>
-        <div className="ui raised segment">
-          <Link to={`/game/new`}>
-            <div className="ui primary button">Create new room</div>
-          </Link>
-        </div>
+        <RoomWizard />
       </div>
     );
   }
