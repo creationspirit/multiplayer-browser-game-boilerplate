@@ -1,61 +1,102 @@
 import React, { Component } from 'react';
 import { Client } from 'colyseus.js';
+import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+import { IRootState } from '../types';
+import Navbar from './fragments/Navbar';
+import RoomWizard from './fragments/RoomWizard';
 
 export interface ILobbyProps {
-  client?: Client;
+  client: Client | null;
 }
 
-class Lobby extends Component<ILobbyProps, {}> {
-  create = () => {
+class Lobby extends Component<ILobbyProps> {
+  state = { availableRooms: [], selectedRoom: undefined };
+
+  private checkRoomsInterval!: NodeJS.Timeout;
+
+  componentDidMount() {
+    this.checkRoomsInterval = setInterval(this.getAvailableRooms, 4000);
+    this.getAvailableRooms();
+  }
+
+  getAvailableRooms = () => {
     if (this.props.client) {
-      this.props.client.join('game', { create: true });
+      (this.props.client as Client).getAvailableRooms('game', (rooms, err) => {
+        if (err) {
+          return console.error(err);
+        }
+        this.setState({ availableRooms: rooms });
+      });
     }
   };
 
-  render() {
-    if (this.props.client) {
-      this.props.client.getAvailableRooms('game', (rooms, err) => {
-        console.log('rooms', rooms);
-      });
-    }
+  componentWillUnmount() {
+    clearInterval(this.checkRoomsInterval);
+  }
 
-    return (
-      <div className="ui container raised segments">
-        <div className="ui segment">
-          <div className="ui buttons">
-            <button className="ui button" onClick={this.create}>
-              Create
-            </button>
-            <button className="ui button">Join</button>
-          </div>
-        </div>
-        <div className="ui segments">
-          <div className="ui segment">
-            <div className="ui relaxed divided list">
-              <div className="item">
-                <div className="content">
-                  <div className="header">Room 1</div>
-                  <div className="description">2/4 clients</div>
-                </div>
-              </div>
-              <div className="item">
-                <div className="content">
-                  <div className="header">Room 2</div>
-                  <div className="description">1/4 clients</div>
-                </div>
-              </div>
-              <div className="item">
-                <div className="content">
-                  <div className="header">Room 3</div>
-                  <div className="description">3/4 clients</div>
-                </div>
-              </div>
+  selectRoom = (roomId: string) => {
+    this.setState({ selectedRoom: roomId });
+  };
+
+  renderAvailableRooms() {
+    if (this.state.availableRooms.length === 0) {
+      return <div className="item">It seems no one is playing at the moment.</div>;
+    }
+    return this.state.availableRooms.map((room: any) => {
+      const selected = room.roomId === this.state.selectedRoom;
+      return (
+        <div
+          className={`item${selected ? ' selected' : ''}`}
+          key={room.roomId}
+          onClick={() => this.selectRoom(room.roomId)}
+        >
+          {selected && (
+            <div className="right floated content">
+              <Link to={`/game/${room.roomId}`}>
+                <div className="ui primary button">Join</div>
+              </Link>
+            </div>
+          )}
+          <div className="content">
+            <div className="header">{room.roomId}</div>
+            <div className="description">
+              {room.clients}/{room.maxClients}
             </div>
           </div>
         </div>
+      );
+    });
+  }
+
+  render() {
+    return (
+      <div className="ui container">
+        <Navbar />
+        <div className="ui raised segment">
+          <h3 className="ui header">
+            <i className="circular inverted users icon" />
+            <div className="content">
+              Available rooms
+              <div className="sub header">Choose one to join</div>
+            </div>
+          </h3>
+          <div className="ui divided list">{this.renderAvailableRooms()}</div>
+        </div>
+        <RoomWizard />
       </div>
     );
   }
 }
 
-export default Lobby;
+const mapStateToProps = ({ gameClient }: IRootState) => {
+  return {
+    client: gameClient.client,
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(Lobby);

@@ -6,7 +6,8 @@
     "object-literal-sort-keys": [false],
     "ordered-imports": [false],
     "member-ordering": false,
-    "radix": false
+    "radix": false,
+    "jsx-no-lambda": false
   },
   "linterOptions": {
     "exclude": ["config/**/*.js", "node_modules/**/*.ts"]

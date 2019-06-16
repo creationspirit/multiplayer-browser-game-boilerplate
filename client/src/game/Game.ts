@@ -49,6 +49,8 @@ export class Game {
   constructor(
     args: ISceneEventArgs,
     client: Colyseus.Client,
+    roomId: string,
+    roomData: any,
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
     setQuestion: (question: any) => void
@@ -57,7 +59,7 @@ export class Game {
     this.engine = args.engine;
     this.scene = args.scene;
 
-    this.router = new RouterService(client);
+    this.router = new RouterService(client, roomId, roomData);
 
     this.lights = new Lights(this.scene);
     this.area = new Area(this.scene);
@@ -124,7 +126,7 @@ export class Game {
     playerTask.onSuccess = task => this.storePlayerPrefab(task);
 
     this.assetsManager.onFinish = tasks => {
-      this.router.connect(this, 'game');
+      this.router.connect(this);
     };
   }
 

@@ -11,13 +11,21 @@ export const COLLECT: string = 'coll';
 export class RouterService {
   client: Colyseus.Client;
   room!: Colyseus.Room;
+  roomId: string;
+  options: any;
 
-  constructor(client: Colyseus.Client) {
+  constructor(client: Colyseus.Client, roomId: string, roomData: any) {
     this.client = client;
+    this.roomId = roomId === 'new' ? 'game' : roomId;
+    this.options = { token: localStorage.getItem('token') };
+    if (roomId === 'new') {
+      this.options.create = true;
+      this.options.roomData = roomData;
+    }
   }
 
-  connect(game: Game, roomId: string = 'game') {
-    this.room = this.client.join(roomId);
+  connect(game: Game) {
+    this.room = this.client.join(this.roomId, this.options);
     this.room.onJoin.add(() => {
       console.log('client joined successfully');
 

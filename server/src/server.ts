@@ -1,17 +1,18 @@
-import dotenv from 'dotenv';
 // Load environment variables from .env file
+import dotenv from 'dotenv';
 dotenv.config();
+
+// Establish database connection
+import './config/db';
 
 import { Server } from 'colyseus';
 import { createServer } from 'http';
 import { monitor } from '@colyseus/monitor';
 import errorHandler from 'errorhandler';
-import cors from 'cors';
 
 import app from './app';
 import { GameRoom } from './rooms/GameRoom';
 
-app.use(cors());
 /**
  * Error Handler. Provides full stack - remove for production
  */
