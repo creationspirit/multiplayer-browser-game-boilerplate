@@ -4,6 +4,8 @@ import { getRepository } from 'typeorm';
 import { auth } from '../middleware/auth';
 import { User } from '../models/User';
 import { UserStats } from '../models/UserStats';
+import { UserStageStats } from '../models/UserStageStats';
+import { Stage } from '../models/Stage';
 import { fetchUser } from '../config/requests';
 
 const router = Router();
@@ -11,13 +13,16 @@ const router = Router();
 router.post('/login', async (req: Request, res: Response) => {
   const { edgarToken } = req.body;
   const repository = getRepository(User);
+  const stageRepository = getRepository(Stage);
   try {
     const edgarUser = await fetchUser(edgarToken);
     let user = await repository.findOne({ edgarId: edgarUser.id });
     if (!user) {
       user = new User();
     }
+    console.log(user);
     user.loadFromEdgarResponse(edgarUser);
+
     if (!user.stats) {
       const stats = new UserStats();
       stats.experience = 0;
@@ -25,7 +30,23 @@ router.post('/login', async (req: Request, res: Response) => {
       stats.loc = 0;
       user.stats = stats;
     }
-    await repository.save(user);
+
+    const stageList = await stageRepository.find({ select: ['id'] });
+    console.log(stageList);
+    stageList.forEach((stage: Stage) => {
+      const stageStat = (user as User).stageStats.find(
+        (s: UserStageStats) => s.stageId === stage.id
+      );
+      if (!stageStat) {
+        const newStageStats = new UserStageStats();
+        newStageStats.stage = stage;
+        newStageStats.level = 1;
+        newStageStats.loc = 0;
+        (user as User).stageStats.push(newStageStats);
+      }
+    });
+
+    user = await repository.save(user);
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (e) {

@@ -49,10 +49,4 @@ export class QuestionState extends Schema {
     const newTest = new TestState(testData.input, testData.output);
     this.tests.push(newTest);
   }
-
-  calculateReward() {
-    const loc = this.solution.split(/\r\n|\r|\n/).length;
-    console.log(loc);
-    return loc * this.score;
-  }
 }

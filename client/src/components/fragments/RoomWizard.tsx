@@ -5,10 +5,11 @@ import { Progress } from 'semantic-ui-react';
 
 import { IRootState } from '../../types';
 import { fetchStages } from '../../thunks/stages';
+import { getLevelVerbose } from '../../utils';
 
 interface IRoomWizardProps {
   loading: boolean;
-  stages: [];
+  stages: any[];
   error: string | null;
   fetchStages: () => void;
 }
@@ -49,11 +50,11 @@ class RoomWizard extends Component<IRoomWizardProps> {
             <div className="description">{stage.description}</div>
           </div>
           <div className="extra content">
-            <Progress percent={30} indicating={true} size="tiny" />
-            <span className="right floated">Beginner</span>
+            <Progress percent={stage.userStats[0].loc} indicating={true} size="tiny" />
+            <span className="right floated">{getLevelVerbose(stage.userStats[0].level)}</span>
             <span>
               <i className="terminal icon" />
-              124 LOC
+              {stage.userStats[0].loc} LOC
             </span>
           </div>
         </div>

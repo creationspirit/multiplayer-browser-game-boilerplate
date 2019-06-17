@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 import jwt from 'jsonwebtoken';
 
 import { UserStats } from './UserStats';
+import { UserStageStats } from './UserStageStats';
 
 type edgarResponse = {
   id: number;
@@ -30,6 +31,9 @@ export class User {
 
   @OneToOne(type => UserStats, 'user', { cascade: true, eager: true })
   stats!: UserStats;
+
+  @OneToMany(type => UserStageStats, 'user', { cascade: true, eager: true })
+  stageStats!: UserStageStats[];
 
   loadFromEdgarResponse(user: edgarResponse) {
     this.edgarId = user.id;

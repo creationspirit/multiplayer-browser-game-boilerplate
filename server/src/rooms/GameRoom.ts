@@ -9,6 +9,7 @@ import { World } from '../game/World';
 import { createVector, getRandomArrayElements } from '../utils/gameUtils';
 import { questionAPI, generateJWT } from '../config/requests';
 import { User } from '../models/User';
+import RuleEngine from './RuleEngine';
 
 import { LEVEL_CONFIG_MOCK as LEVEL } from '../config/mocks';
 
@@ -18,6 +19,7 @@ export enum MessageType {
   SOLUTION_UPDATE = 'supd',
   SOLVE_ATTEMPT = 'solv',
   COLLECT = 'coll',
+  DISPLAY_REWARD = 'drew',
 }
 
 interface IConfig {
@@ -35,10 +37,16 @@ export class GameRoom extends Room<StateHandler> {
   private world!: World;
   private timer!: number;
   private config!: IConfig;
+  private ruleEngine!: RuleEngine;
 
   // When room is initialized
   onInit(options: any) {
     this.config = options.roomData;
+    this.ruleEngine = new RuleEngine(
+      options.roomData.mode === 2 ? true : false,
+      options.roomData.stage,
+      options.roomData.difficulty
+    );
     console.log('Creating a room with configuration:', options);
     this.world = new World();
     this.timer = TIME;
@@ -74,11 +82,12 @@ export class GameRoom extends Room<StateHandler> {
   }
 
   // When client successfully join the room
-  onJoin(client: Client, options: any, auth: any) {
+  onJoin(client: Client, options: any, auth: User) {
     this.send(client, { type: MessageType.LVL_INIT, data: LEVEL });
     this.world.createPlayer(client.sessionId, createVector(LEVEL.spawnPoint));
     const player = new PlayerState(
-      `Player ${this.clients.length}`,
+      auth.id,
+      `${auth.firstName} ${auth.lastName}`,
       LEVEL.spawnPoint.x,
       LEVEL.spawnPoint.z
     );
@@ -104,7 +113,7 @@ export class GameRoom extends Room<StateHandler> {
     }
 
     if (message.type === MessageType.COLLECT) {
-      const reward = this.state.questions[data.id].calculateReward();
+      this.completeQuestion(data.id);
     }
   }
 
@@ -182,5 +191,24 @@ export class GameRoom extends Room<StateHandler> {
     } else {
       this.state.questions[id].status = QuestionStatus.STANDARD;
     }
+  }
+
+  async completeQuestion(questionId: number) {
+    try {
+      const reward = await this.ruleEngine.dealRewards(this.state, questionId);
+      this.state.removeQuestion(questionId);
+      this.world.removePickup(questionId);
+      this.broadcast(
+        {
+          type: MessageType.DISPLAY_REWARD,
+          data: {
+            id: questionId,
+            loc: reward.loc,
+            exp: reward.exp,
+          },
+        },
+        { afterNextPatch: true }
+      );
+    } catch (e) {}
   }
 }

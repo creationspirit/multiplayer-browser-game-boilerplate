@@ -27,7 +27,7 @@ export enum PrefabID {
 export class Game {
   private canvas: HTMLCanvasElement;
   private engine: BABYLON.Engine;
-  private scene: BABYLON.Scene;
+  scene: BABYLON.Scene;
 
   private prefabs: { [id: string]: BABYLON.Mesh } = {};
   private lights: Lights;
@@ -66,6 +66,7 @@ export class Game {
 
     this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui', true, this.scene);
     this.timer = this.createTimerGUI();
+    this.createCrosshairGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
     // Store references to react state callbacks
@@ -209,6 +210,15 @@ export class Game {
     this.rivals[key] = newRival;
   }
 
+  removePlayer(key: string) {
+    const rival = this.rivals[key];
+    if (rival) {
+      rival.skeleton.dispose();
+      rival.mesh.dispose();
+      delete this.rivals[key];
+    }
+  }
+
   updatePlayer(key: string, position: BABYLON.Vector3) {
     if (key === this.player.id) {
       position.y = 2;
@@ -224,6 +234,14 @@ export class Game {
     newPickup.init(this.lights, position);
     this.setupPickupActions(newPickup);
     this.pickups[newPickup.id] = newPickup;
+  }
+
+  removePickup(id: string) {
+    const pickup: Pickup = this.pickups[id];
+    if (pickup) {
+      pickup.dispose();
+      delete this.pickups[id];
+    }
   }
 
   createTimerGUI() {
@@ -249,5 +267,42 @@ export class Game {
     this.advancedTexture.addControl(label);
 
     return textBlock;
+  }
+
+  createNotificationGUI(text: string, timeout: number | null = null) {
+    const label = new GUI.Rectangle('reward_rectangle');
+    label.background = 'black';
+    label.paddingTop = '100px';
+    label.alpha = 0.6;
+    label.cornerRadius = 20;
+    label.width = '400px';
+    label.height = '300px';
+    label.thickness = 1;
+    label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const textBlock = new GUI.TextBlock();
+    textBlock.resizeToFit = true;
+    textBlock.text = text;
+    textBlock.fontSize = 36;
+    textBlock.fontStyle = 'bold';
+    textBlock.color = 'white';
+    label.addControl(textBlock);
+    this.advancedTexture.addControl(label);
+    if (timeout) {
+      setTimeout(() => {
+        this.advancedTexture.removeControl(label);
+        label.dispose();
+      }, timeout);
+    }
+  }
+
+  createCrosshairGUI() {
+    const image = new GUI.Image('crosshair', `${process.env.PUBLIC_URL}/icons/crosshair.png`);
+    image.width = '30px';
+    image.height = '30px';
+    image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    this.advancedTexture.addControl(image);
   }
 }

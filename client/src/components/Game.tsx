@@ -38,6 +38,11 @@ class PageWithScene extends React.Component<IGameProps> {
     this.game.start();
   };
 
+  componentWillUnmount() {
+    this.game.router.room.leave();
+    this.game.scene.dispose();
+  }
+
   setTaskInProgress = () => {
     this.setState({ taskInProgress: true });
   };

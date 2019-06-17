@@ -7,6 +7,7 @@ export const PLAYER_MOVEMENT: string = 'move';
 export const SOLUTION_UPDATE: string = 'supd';
 export const SOLVE_ATTEMPT: string = 'solv';
 export const COLLECT: string = 'coll';
+export const DISPLAY_REWARD: string = 'drew';
 
 export class RouterService {
   client: Colyseus.Client;
@@ -65,8 +66,11 @@ export class RouterService {
     };
 
     this.room.state.questions.onAdd = (question: any, key: string) => {
-      // console.log(question, 'has been added at', key);
       game.addPickup(key, new BABYLON.Vector3(question.x, 0.2, question.y));
+    };
+
+    this.room.state.questions.onRemove = (question: any, key: string) => {
+      game.removePickup(key);
     };
 
     this.room.state.players.onAdd = (player: any, key: string) => {
@@ -77,8 +81,12 @@ export class RouterService {
     };
 
     this.room.state.players.onChange = (player: any, key: string) => {
-      // console.log(player, 'have changes at', key);
       game.updatePlayer(key, new BABYLON.Vector3(player.x, 0.2, player.y));
+    };
+
+    this.room.state.players.onRemove = (player: any, key: string) => {
+      game.removePlayer(key);
+      // remove your player entity from the game world!
     };
 
     this.room.state.questions.onChange = (question: any, key: string) => {
@@ -86,6 +94,15 @@ export class RouterService {
         game.setQuestion(question);
       }
     };
+
+    this.room.onMessage.add((message: any) => {
+      if (message.type === DISPLAY_REWARD) {
+        console.log(message);
+        const { id, loc, exp } = message.data;
+        const notificationText = `Question ${id} solved!\nREWARDS:\nLOC ${loc}\nEXP ${exp}`;
+        game.createNotificationGUI(notificationText, 6000);
+      }
+    });
   }
 
   sendMovement(

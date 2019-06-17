@@ -75,4 +75,12 @@ export class Pickup {
 
     return label;
   }
+
+  dispose() {
+    this.particleSet.dispose();
+    this.solveAreaBox.dispose();
+    this.boundingBox.dispose();
+    this.label.dispose();
+    this.pickupMesh.dispose();
+  }
 }

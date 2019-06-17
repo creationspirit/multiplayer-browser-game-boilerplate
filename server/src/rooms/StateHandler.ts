@@ -36,6 +36,10 @@ export class StateHandler extends Schema {
     this.questions[data.id] = newQuestion;
   }
 
+  removeQuestion(questionId: number): void {
+    delete this.questions[questionId];
+  }
+
   updateTimer(time: number) {
     this.timer = msToMinSec(time);
   }
