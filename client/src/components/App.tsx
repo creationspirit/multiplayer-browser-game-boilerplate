@@ -43,7 +43,7 @@ class App extends Component<IAppProps> {
     return (
       <div className="App">
         <BrowserRouter>
-          <div>
+          <div className="router-wrapper">
             <Switch>
               <Route path="/login" exact={true} component={Login} />
               <ProtectedRoute

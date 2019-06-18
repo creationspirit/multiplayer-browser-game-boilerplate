@@ -176,7 +176,7 @@ export class Game {
 
   private setupPickupActions(pickup: Pickup) {
     const actionManager = this.player.getActionManager();
-    actionManager.registerAction(
+    pickup.actions.push(actionManager.registerAction(
       new BABYLON.ExecuteCodeAction(
         {
           trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
@@ -188,8 +188,8 @@ export class Game {
           this.player.inSolvingAreaOf = pickup;
         }
       )
-    );
-    actionManager.registerAction(
+    ) as BABYLON.IAction);
+    pickup.actions.push(actionManager.registerAction(
       new BABYLON.ExecuteCodeAction(
         {
           trigger: BABYLON.ActionManager.OnIntersectionExitTrigger,
@@ -201,7 +201,7 @@ export class Game {
           this.removeTaskInProgress();
         }
       )
-    );
+    ) as BABYLON.IAction);
   }
 
   addPlayer(key: string, position: BABYLON.Vector3) {
@@ -239,6 +239,10 @@ export class Game {
   removePickup(id: string) {
     const pickup: Pickup = this.pickups[id];
     if (pickup) {
+      const actionManager = this.player.getActionManager();
+      pickup.actions.forEach(action => {
+        actionManager.unregisterAction(action);
+      });
       pickup.dispose();
       delete this.pickups[id];
     }
@@ -247,22 +251,33 @@ export class Game {
   createTimerGUI() {
     const label = new GUI.Rectangle(`timer_rectangle`);
     label.background = 'black';
-    label.paddingTop = 10;
+    label.paddingTop = '10px';
     label.alpha = 0.6;
     label.cornerRadius = 20;
-    label.width = 0.06;
-    label.height = 0.05;
+    label.width = '200px';
+    label.height = '100px';
     label.thickness = 1;
     label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
+    const panel = new GUI.StackPanel();
+    label.addControl(panel);
+
     const textBlock = new GUI.TextBlock();
     textBlock.resizeToFit = true;
     textBlock.text = '30:00';
-    textBlock.fontSize = 36;
+    textBlock.fontSize = 30;
     textBlock.fontStyle = 'bold';
     textBlock.color = 'white';
-    label.addControl(textBlock);
+    panel.addControl(textBlock);
+
+    const scoreboard = new GUI.TextBlock();
+    scoreboard.resizeToFit = true;
+    scoreboard.text = '0/5';
+    scoreboard.fontSize = 30;
+    scoreboard.fontStyle = 'bold';
+    scoreboard.color = 'white';
+    panel.addControl(scoreboard);
 
     this.advancedTexture.addControl(label);
 
@@ -272,11 +287,11 @@ export class Game {
   createNotificationGUI(text: string, timeout: number | null = null) {
     const label = new GUI.Rectangle('reward_rectangle');
     label.background = 'black';
-    label.paddingTop = '100px';
+    label.paddingTop = '120px';
     label.alpha = 0.6;
     label.cornerRadius = 20;
-    label.width = '400px';
-    label.height = '300px';
+    label.width = '350px';
+    label.height = '270px';
     label.thickness = 1;
     label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
@@ -284,7 +299,7 @@ export class Game {
     const textBlock = new GUI.TextBlock();
     textBlock.resizeToFit = true;
     textBlock.text = text;
-    textBlock.fontSize = 36;
+    textBlock.fontSize = 30;
     textBlock.fontStyle = 'bold';
     textBlock.color = 'white';
     label.addControl(textBlock);

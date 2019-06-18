@@ -116,4 +116,8 @@ export class World {
     }
     delete this.pickups[id];
   }
+
+  dispose() {
+    this.scene.dispose();
+  }
 }

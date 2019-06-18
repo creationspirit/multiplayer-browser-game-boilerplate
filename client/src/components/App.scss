@@ -1,16 +1,36 @@
 html,
 body {
-  overflow: hidden;
+  overflow: auto;
   width: 100%;
-  height: 100%;
+  // height: 100%;
   margin: 0;
   padding: 0;
 }
 
+// #root,
+// .game-wrapper,
+// .App,
+// .router-wrapper {
+//   width: 100%;
+//   height: 100%;
+//   margin: 0;
+//   padding: 0;
+// }
+
+// .ui.container {
+//   height: 0;
+// }
+
+.game-wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
 #renderCanvas {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   touch-action: none;
+  overflow: hidden;
 }
 
 .code-edit-ui {

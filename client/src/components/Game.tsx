@@ -70,12 +70,12 @@ class PageWithScene extends React.Component<IGameProps> {
 
   render() {
     return (
-      <div>
+      <div className="game-wrapper">
         <BabylonScene
           onSceneMount={this.onSceneMount}
           adaptToDeviceRatio={true}
-          height={'650'}
-          width={'1200'}
+          // height={'600'}
+          // width={'1200'}
         />
         {this.state.taskInProgress && (
           <CodeEditor

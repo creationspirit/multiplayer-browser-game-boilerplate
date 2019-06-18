@@ -10,17 +10,9 @@ import { createVector, getRandomArrayElements } from '../utils/gameUtils';
 import { questionAPI, generateJWT } from '../config/requests';
 import { User } from '../models/User';
 import RuleEngine from './RuleEngine';
+import { MessageType } from './constants';
 
 import { LEVEL_CONFIG_MOCK as LEVEL } from '../config/mocks';
-
-export enum MessageType {
-  LVL_INIT = 'LVL_INIT',
-  MOVE = 'move',
-  SOLUTION_UPDATE = 'supd',
-  SOLVE_ATTEMPT = 'solv',
-  COLLECT = 'coll',
-  DISPLAY_REWARD = 'drew',
-}
 
 interface IConfig {
   stage: number;
@@ -131,7 +123,9 @@ export class GameRoom extends Room<StateHandler> {
   }
 
   // Cleanup callback, called after there are no more clients in the room. (see `autoDispose`)
-  onDispose() {}
+  onDispose() {
+    this.world.dispose();
+  }
 
   async getQuestions() {
     let response;
