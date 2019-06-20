@@ -32,3 +32,9 @@ export enum QuestionStatus {
   SOLVED = 'solv',
   PARTIAL = 'part',
 }
+
+export enum GameStatus {
+  ONGOING = 'ong',
+  WIN = 'win',
+  LOSE = 'los',
+}

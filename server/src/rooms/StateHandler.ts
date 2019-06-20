@@ -47,5 +47,8 @@ export class StateHandler extends Schema {
 
   updateTimer(time: number) {
     this.timer = msToMinSec(time);
+    if (time === 0) {
+      this.status = GameStatus.LOSE;
+    }
   }
 }

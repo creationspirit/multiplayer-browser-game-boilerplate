@@ -10,7 +10,7 @@ import { createVector, getRandomArrayElements } from '../utils/gameUtils';
 import { questionAPI, generateJWT } from '../config/requests';
 import { User } from '../models/User';
 import RuleEngine from './RuleEngine';
-import { MessageType } from './constants';
+import { MessageType, GameStatus } from './constants';
 
 import { LEVEL_CONFIG_MOCK as LEVEL } from '../config/mocks';
 
@@ -192,6 +192,11 @@ export class GameRoom extends Room<StateHandler> {
       const reward = await this.ruleEngine.dealRewards(this.state, questionId);
       this.state.removeQuestion(questionId);
       this.world.removePickup(questionId);
+
+      if (this.state.questions.size === 0) {
+        this.state.status = GameStatus.WIN;
+      }
+
       this.broadcast(
         {
           type: MessageType.DISPLAY_REWARD,

@@ -36,6 +36,9 @@ export class Game {
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
   timer!: GUI.TextBlock;
+  scoreboard!: GUI.TextBlock;
+  private questionNum: number;
+  private solvedQuestionsNum: number;
 
   private advancedTexture: GUI.AdvancedDynamicTexture;
   private assetsManager: BABYLON.AssetsManager;
@@ -45,6 +48,8 @@ export class Game {
   private setTaskInProgress: () => void;
   private removeTaskInProgress: () => void;
   setQuestion: (question: any) => void;
+  resetState: (questionId: number) => void;
+  setGameResult: (gameResult: string) => void;
 
   constructor(
     args: ISceneEventArgs,
@@ -53,7 +58,9 @@ export class Game {
     roomData: any,
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
-    setQuestion: (question: any) => void
+    setQuestion: (question: any) => void,
+    resetState: (questionId: number) => void,
+    setGameResult: (gameResult: string) => void
   ) {
     this.canvas = args.canvas as HTMLCanvasElement;
     this.engine = args.engine;
@@ -65,14 +72,21 @@ export class Game {
     this.area = new Area(this.scene);
 
     this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui', true, this.scene);
-    this.timer = this.createTimerGUI();
+    const { timerLabel, scoreboard } = this.createTimerGUI();
+    this.timer = timerLabel;
+    this.scoreboard = scoreboard;
     this.createCrosshairGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
+
+    this.questionNum = 0;
+    this.solvedQuestionsNum = 0;
 
     // Store references to react state callbacks
     this.setTaskInProgress = setTaskInProgress;
     this.removeTaskInProgress = removeTaskInProgress;
     this.setQuestion = setQuestion;
+    this.resetState = resetState;
+    this.setGameResult = setGameResult;
   }
 
   private createMeshTask(taskId: string, fileName: string) {
@@ -234,6 +248,8 @@ export class Game {
     newPickup.init(this.lights, position);
     this.setupPickupActions(newPickup);
     this.pickups[newPickup.id] = newPickup;
+    this.questionNum++;
+    this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
   }
 
   removePickup(id: string) {
@@ -245,7 +261,9 @@ export class Game {
       });
       pickup.dispose();
       delete this.pickups[id];
+      this.solvedQuestionsNum++;
     }
+    this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
   }
 
   createTimerGUI() {
@@ -263,17 +281,17 @@ export class Game {
     const panel = new GUI.StackPanel();
     label.addControl(panel);
 
-    const textBlock = new GUI.TextBlock();
-    textBlock.resizeToFit = true;
-    textBlock.text = '30:00';
-    textBlock.fontSize = 30;
-    textBlock.fontStyle = 'bold';
-    textBlock.color = 'white';
-    panel.addControl(textBlock);
+    const timerLabel = new GUI.TextBlock();
+    timerLabel.resizeToFit = true;
+    timerLabel.text = '30:00';
+    timerLabel.fontSize = 30;
+    timerLabel.fontStyle = 'bold';
+    timerLabel.color = 'white';
+    panel.addControl(timerLabel);
 
     const scoreboard = new GUI.TextBlock();
     scoreboard.resizeToFit = true;
-    scoreboard.text = '0/5';
+    scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
     scoreboard.fontSize = 30;
     scoreboard.fontStyle = 'bold';
     scoreboard.color = 'white';
@@ -281,7 +299,7 @@ export class Game {
 
     this.advancedTexture.addControl(label);
 
-    return textBlock;
+    return { timerLabel, scoreboard };
   }
 
   createNotificationGUI(text: string, timeout: number | null = null) {

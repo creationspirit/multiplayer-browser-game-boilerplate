@@ -11,24 +11,39 @@ export default class RuleEngine {
 
   isBattle: boolean;
   exerciseId: number;
+  difficulty: number;
 
   constructor(isBattle: boolean, exerciseId: number, difficulty: number) {
     this.isBattle = isBattle;
     this.exerciseId = exerciseId;
+    this.difficulty = difficulty;
   }
 
   async dealRewards(state: StateHandler, questionId: number) {
     const loc = this.calculateReward(state.questions[questionId]);
-    const exp = this.calculateReward(state.questions[questionId]);
+    const exp = this.calculateExp();
 
     const statsRepository = getRepository(UserStats);
     const playerIds = Object.keys(state.players).map(key => state.players[key].id);
     await statsRepository.increment({ user: { id: In(playerIds) } }, 'loc', loc);
+    await statsRepository.increment({ user: { id: In(playerIds) } }, 'experience', exp);
     return { loc, exp };
   }
 
   private calculateReward(question: QuestionState) {
     const loc = question.solution.split(/\r\n|\r|\n/).length;
     return Math.floor(loc * question.score);
+  }
+
+  private calculateExp() {
+    switch (this.difficulty) {
+      case 1:
+        return this.EASY_EXP_REWARD;
+      case 2:
+        return this.NORMAL_EXP_REWARD;
+      case 3:
+        return this.HARD_EXP_REWARD;
+    }
+    return this.EASY_EXP_REWARD;
   }
 }

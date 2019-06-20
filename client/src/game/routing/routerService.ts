@@ -2,6 +2,7 @@ import * as Colyseus from 'colyseus.js';
 import * as BABYLON from 'babylonjs';
 
 import { Game } from '../Game';
+import { GameStatus } from '../../constants';
 
 export const PLAYER_MOVEMENT: string = 'move';
 export const SOLUTION_UPDATE: string = 'supd';
@@ -62,6 +63,14 @@ export class RouterService {
         if (change.field === 'timer') {
           game.timer.text = change.value;
         }
+
+        if (change.field === 'status') {
+          if (change.value === GameStatus.WIN) {
+            game.setGameResult(GameStatus.WIN);
+          } else if (change.value === GameStatus.LOSE) {
+            game.setGameResult(GameStatus.LOSE);
+          }
+        }
       });
     };
 
@@ -71,6 +80,7 @@ export class RouterService {
 
     this.room.state.questions.onRemove = (question: any, key: string) => {
       game.removePickup(key);
+      game.resetState(question.id);
     };
 
     this.room.state.players.onAdd = (player: any, key: string) => {
@@ -86,7 +96,6 @@ export class RouterService {
 
     this.room.state.players.onRemove = (player: any, key: string) => {
       game.removePlayer(key);
-      // remove your player entity from the game world!
     };
 
     this.room.state.questions.onChange = (question: any, key: string) => {
@@ -99,7 +108,7 @@ export class RouterService {
       if (message.type === DISPLAY_REWARD) {
         console.log(message);
         const { id, loc, exp } = message.data;
-        const notificationText = `Question ${id} solved!\nREWARDS:\nLOC ${loc}\nEXP ${exp}`;
+        const notificationText = `Question ${id} solved!\nREWARDS:\nLOC ${loc}\nXP ${exp}`;
         game.createNotificationGUI(notificationText, 6000);
       }
     });
