@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Game from './Game';
 import Lobby from './Lobby';
 import Login from './Login';
+import Profile from './Profile';
 import { ProtectedRoute, IProtectedRouteProps } from './fragments/ProtectedRoute';
 import { IRootState } from '../types';
 import { connectToGameClient } from '../thunks';
@@ -57,6 +58,12 @@ class App extends Component<IAppProps> {
                 path="/game/:roomId"
                 exact={true}
                 component={Game}
+              />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/me"
+                exact={true}
+                component={Profile}
               />
             </Switch>
           </div>

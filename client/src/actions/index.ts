@@ -4,15 +4,7 @@ import * as Colyseus from 'colyseus.js';
 
 import { ILoginSuccess, ILoginError, ILoginRequest, ILogout } from './auth';
 import { IStagesError, IStagesLoading, IStagesSuccess } from './stages';
-
-export interface IAddGameClient extends Action {
-  type: constants.ADD_GAME_CLIENT;
-  client: Colyseus.Client;
-}
-
-export interface IRemoveGameClient extends Action {
-  type: constants.REMOVE_GAME_CLIENT;
-}
+import { IAchievementsError, IAchievementsLoading, IAchievementsSuccess } from './achievements';
 
 export type IActions =
   | IAddGameClient
@@ -23,7 +15,19 @@ export type IActions =
   | ILogout
   | IStagesError
   | IStagesSuccess
-  | IStagesLoading;
+  | IStagesLoading
+  | IAchievementsError
+  | IAchievementsLoading
+  | IAchievementsSuccess;
+
+export interface IAddGameClient extends Action {
+  type: constants.ADD_GAME_CLIENT;
+  client: Colyseus.Client;
+}
+
+export interface IRemoveGameClient extends Action {
+  type: constants.REMOVE_GAME_CLIENT;
+}
 
 export function addGameClient(client: Colyseus.Client): IAddGameClient {
   return {

@@ -20,7 +20,6 @@ router.post('/login', async (req: Request, res: Response) => {
     if (!user) {
       user = new User();
     }
-    console.log(user);
     user.loadFromEdgarResponse(edgarUser);
 
     if (!user.stats) {
@@ -32,7 +31,6 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     const stageList = await stageRepository.find({ select: ['id'] });
-    console.log(stageList);
     stageList.forEach((stage: Stage) => {
       const stageStat = (user as User).stageStats.find(
         (s: UserStageStats) => s.stageId === stage.id

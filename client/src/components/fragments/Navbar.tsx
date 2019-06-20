@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Progress } from 'semantic-ui-react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 import { IRootState } from '../../types';
 import { logout } from '../../thunks/auth';
@@ -31,8 +32,15 @@ class Navbar extends Component<INavbarProps> {
           </div>
         </div>
         <div className="ui secondary menu menu-header">
-          <a className="ui item">Profile</a>
-          <a className="ui item">Store</a>
+          <Link to="/" className="ui item">
+            Home
+          </Link>
+          <Link to="/me" className="ui item">
+            Profile
+          </Link>
+          <Link to="/store" className="ui item">
+            Store
+          </Link>
           <a className="ui item" onClick={this.props.logout}>
             Logout
           </a>

@@ -15,7 +15,6 @@ router.get('/', auth, async (req: Request, res: Response) => {
       return { ...e, title: e.title.replace('GAME__', '') };
     });
     const stages = await repository.find();
-    console.log(stages);
     exercises.forEach((e: any) => {
       const index = stages.findIndex((stage: Stage) => stage.edgarId === e.id);
       if (index !== -1) {

@@ -7,6 +7,7 @@ import cors from 'cors';
 
 import userController from './controllers/user';
 import stageController from './controllers/stage';
+import achievementController from './controllers/achievement';
 
 // Create Express server
 const app = express();
@@ -22,5 +23,6 @@ app.use(cors());
 
 app.use('/users', userController);
 app.use('/stages', stageController);
+app.use('/achievements', achievementController);
 
 export default app;
