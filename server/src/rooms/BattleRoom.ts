@@ -2,8 +2,7 @@ import { Room, Client } from 'colyseus';
 import { getRepository } from 'typeorm';
 import jwt from 'jsonwebtoken';
 
-import { StateHandler } from './StateHandler';
-import { PlayerState } from './state/PlayerState';
+import { BattleStateHandler } from './BattleStateHandler';
 import { World } from '../game/World';
 import { createVector, getRandomArrayElements } from '../utils/gameUtils';
 import { questionAPI, generateJWT } from '../config/requests';
@@ -18,40 +17,30 @@ interface IConfig {
   difficulty: number;
 }
 
-// this should be on metadata for onInit method
-const TIME: number = 30 * 60000; // 30 min
-
 // ALL client.sessionId SHOULD BE CHANGED TO client.id IN A PRODUCTION ENVIRONMENT
-export class GameRoom extends Room<StateHandler> {
+export class BattleRoom extends Room<BattleStateHandler> {
   maxClients = 4;
 
   private world!: World;
-  private timer!: number;
   private config!: IConfig;
-  private ruleEngine!: RuleEngine;
+  // private ruleEngine!: RuleEngine;
 
   // When room is initialized
   onInit(options: any) {
     this.config = options.roomData;
-    this.ruleEngine = new RuleEngine(
-      options.roomData.mode === 2 ? true : false,
-      options.roomData.stage,
-      options.roomData.difficulty
-    );
+    // this.ruleEngine = new RuleEngine(
+    //   options.roomData.mode === 2 ? true : false,
+    //   options.roomData.stage,
+    //   options.roomData.difficulty
+    // );
     console.log('Creating a room with configuration:', options);
     this.world = new World();
-    this.timer = TIME;
     this.world.init(LEVEL);
     console.log('World is initialized');
     this.getQuestions();
 
     this.setSimulationInterval(() => this.onUpdate());
-    this.setState(new StateHandler(TIME));
-
-    this.clock.setInterval(() => {
-      this.timer = this.timer - 1000;
-      this.state.updateTimer(this.timer);
-    }, 1000);
+    this.setState(new BattleStateHandler());
   }
 
   // Checks if a new client is allowed to join.
@@ -76,13 +65,13 @@ export class GameRoom extends Room<StateHandler> {
   onJoin(client: Client, options: any, auth: User) {
     this.send(client, { type: MessageType.LVL_INIT, data: LEVEL });
     this.world.createPlayer(client.sessionId, createVector(LEVEL.spawnPoint));
-    const player = new PlayerState(
+    this.state.addPlayer(
+      client.sessionId,
       auth.id,
       `${auth.firstName} ${auth.lastName}`,
       LEVEL.spawnPoint.x,
       LEVEL.spawnPoint.z
     );
-    this.state.addPlayer(client.sessionId, player);
     console.log(`player ${client.sessionId} joined.`);
   }
 
@@ -96,11 +85,12 @@ export class GameRoom extends Room<StateHandler> {
     }
 
     if (message.type === MessageType.SOLUTION_UPDATE) {
-      this.state.questions[data.id].solution = data.sourceCode;
+      const team = this.state.players[client.sessionId].team;
+      this.state.questions[data.id].solutions[team].solution = data.sourceCode;
     }
 
     if (message.type === MessageType.SOLVE_ATTEMPT) {
-      this.solveQuestion(data.id);
+      this.solveQuestion(data.id, this.state.players[client.sessionId].team);
     }
 
     if (message.type === MessageType.COLLECT) {
@@ -154,10 +144,10 @@ export class GameRoom extends Room<StateHandler> {
     });
   }
 
-  async solveQuestion(id: string) {
+  async solveQuestion(id: string, team: string) {
     let response;
-    this.state.questions[id].status = QuestionStatus.EVALUATE;
-    const solution = this.state.questions[id].solution;
+    this.state.questions[id].solutions[team].status = QuestionStatus.EVALUATE;
+    const solution = this.state.questions[id].solutions[team].solution;
     try {
       response = await questionAPI.post(
         `/question/exec/${id}`,
@@ -169,44 +159,43 @@ export class GameRoom extends Room<StateHandler> {
         }
       );
     } catch (e) {
-      this.state.questions[id].status = QuestionStatus.STANDARD;
+      this.state.questions[id].solutions[team].status = QuestionStatus.STANDARD;
       return console.log('Unable to solve question', e);
     }
     response.data.result.c_outcome.forEach((outcome: any, index: number) => {
-      this.state.questions[id].tests[index].updateCurrent(outcome);
+      this.state.questions[id].solutions[team].tests[index].updateCurrent(outcome);
     });
-    this.state.questions[id].score = parseFloat(response.data.result.score_perc);
 
     if (response.data.result.is_partial) {
-      this.state.questions[id].status = QuestionStatus.PARTIAL;
+      this.state.questions[id].solutions[team].status = QuestionStatus.PARTIAL;
     } else if (response.data.result.is_correct) {
-      this.state.questions[id].status = QuestionStatus.SOLVED;
+      this.state.questions[id].solutions[team].status = QuestionStatus.SOLVED;
     } else {
-      this.state.questions[id].status = QuestionStatus.STANDARD;
+      this.state.questions[id].solutions[team].status = QuestionStatus.STANDARD;
     }
   }
 
   async completeQuestion(questionId: number) {
     try {
-      const reward = await this.ruleEngine.dealRewards(this.state, questionId);
+      // const reward = await this.ruleEngine.dealRewards(this.state, questionId);
       this.state.removeQuestion(questionId);
       this.world.removePickup(questionId);
 
       if (this.state.questions.size === 0) {
-        this.state.status = GameStatus.WIN;
+        this.state.status = GameStatus.OVER;
       }
 
-      this.broadcast(
-        {
-          type: MessageType.DISPLAY_REWARD,
-          data: {
-            id: questionId,
-            loc: reward.loc,
-            exp: reward.exp,
-          },
-        },
-        { afterNextPatch: true }
-      );
+      // this.broadcast(
+      //   {
+      //     type: MessageType.DISPLAY_REWARD,
+      //     data: {
+      //       id: questionId,
+      //       loc: reward.loc,
+      //       exp: reward.exp,
+      //     },
+      //   },
+      //   { afterNextPatch: true }
+      // );
     } catch (e) {}
   }
 }

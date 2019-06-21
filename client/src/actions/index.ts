@@ -5,6 +5,7 @@ import * as Colyseus from 'colyseus.js';
 import { ILoginSuccess, ILoginError, ILoginRequest, ILogout } from './auth';
 import { IStagesError, IStagesLoading, IStagesSuccess } from './stages';
 import { IAchievementsError, IAchievementsLoading, IAchievementsSuccess } from './achievements';
+import { IUsersError, IUsersLoading, IUsersSuccess } from './users';
 
 export type IActions =
   | IAddGameClient
@@ -18,7 +19,10 @@ export type IActions =
   | IStagesLoading
   | IAchievementsError
   | IAchievementsLoading
-  | IAchievementsSuccess;
+  | IAchievementsSuccess
+  | IUsersError
+  | IUsersLoading
+  | IUsersSuccess;
 
 export interface IAddGameClient extends Action {
   type: constants.ADD_GAME_CLIENT;

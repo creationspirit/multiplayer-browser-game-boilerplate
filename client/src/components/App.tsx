@@ -6,6 +6,7 @@ import Game from './Game';
 import Lobby from './Lobby';
 import Login from './Login';
 import Profile from './Profile';
+import Leaderboard from './Leaderboard';
 import { ProtectedRoute, IProtectedRouteProps } from './fragments/ProtectedRoute';
 import { IRootState } from '../types';
 import { connectToGameClient } from '../thunks';
@@ -64,6 +65,12 @@ class App extends Component<IAppProps> {
                 path="/me"
                 exact={true}
                 component={Profile}
+              />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/leaderboard"
+                exact={true}
+                component={Leaderboard}
               />
             </Switch>
           </div>

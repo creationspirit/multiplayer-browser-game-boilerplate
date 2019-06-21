@@ -56,4 +56,13 @@ router.get('/me', auth, async (req, res) => {
   res.send(req.user);
 });
 
+router.get('/', auth, async (req, res) => {
+  const repository = getRepository(User);
+  const users = await repository.find({
+    select: ['id', 'firstName', 'lastName'],
+    relations: ['stats', 'achievements'],
+  });
+  res.send({ users });
+});
+
 export default router;

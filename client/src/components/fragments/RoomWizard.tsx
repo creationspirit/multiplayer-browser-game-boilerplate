@@ -29,8 +29,8 @@ class RoomWizard extends Component<IRoomWizardProps> {
     this.setState({ difficulty: difficultyId });
   };
 
-  setMode = (modeId: number) => {
-    this.setState({ mode: modeId });
+  setMode = (mode: string) => {
+    this.setState({ mode });
   };
 
   renderStages = () => {
@@ -95,14 +95,14 @@ class RoomWizard extends Component<IRoomWizardProps> {
       <div className="room-wizard-mode">
         <div className="ui sub header">Choose mode</div>
         <button
-          className={`fluid ui button ${this.state.mode === 1 ? 'orange' : ''}`}
-          onClick={() => this.setMode(1)}
+          className={`fluid ui button ${this.state.mode === 'game' ? 'orange' : ''}`}
+          onClick={() => this.setMode('game')}
         >
           Co-op
         </button>
         <button
-          className={`fluid ui button ${this.state.mode === 2 ? 'orange' : ''}`}
-          onClick={() => this.setMode(2)}
+          className={`fluid ui button ${this.state.mode === 'battle' ? 'orange' : ''}`}
+          onClick={() => this.setMode('battle')}
         >
           Battle
         </button>

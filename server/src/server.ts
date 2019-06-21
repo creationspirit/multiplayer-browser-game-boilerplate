@@ -12,6 +12,7 @@ import errorHandler from 'errorhandler';
 
 import app from './app';
 import { GameRoom } from './rooms/GameRoom';
+import { BattleRoom } from './rooms/BattleRoom';
 
 /**
  * Error Handler. Provides full stack - remove for production
@@ -27,6 +28,7 @@ const gameServer = new Server({
 });
 
 gameServer.register('game', GameRoom);
+gameServer.register('battle', BattleRoom);
 // Register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor(gameServer));
 

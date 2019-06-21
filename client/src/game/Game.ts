@@ -39,6 +39,7 @@ export class Game {
   scoreboard!: GUI.TextBlock;
   private questionNum: number;
   private solvedQuestionsNum: number;
+  private mode: string;
 
   private advancedTexture: GUI.AdvancedDynamicTexture;
   private assetsManager: BABYLON.AssetsManager;
@@ -75,6 +76,11 @@ export class Game {
     const { timerLabel, scoreboard } = this.createTimerGUI();
     this.timer = timerLabel;
     this.scoreboard = scoreboard;
+    this.mode = roomData.mode;
+    if (roomData.mode === 'battle') {
+      this.timer.text = 'BLUE - RED';
+      this.scoreboard.text = '0 - 0';
+    }
     this.createCrosshairGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
 
@@ -176,9 +182,20 @@ export class Game {
           parameter: ' ',
         },
         () => {
-          this.setQuestion(
-            this.router.room.state.questions[(this.player.inSolvingAreaOf as Pickup).id]
-          );
+          const question = this.router.room.state.questions[
+            (this.player.inSolvingAreaOf as Pickup).id
+          ];
+          if (this.mode === 'game') {
+            this.setQuestion(question);
+          } else {
+            this.setQuestion({
+              solution: question.solutions[this.router.team as string].solution,
+              tests: question.solutions[this.router.team as string].tests,
+              status: question.solutions[this.router.team as string].status,
+              id: question.id,
+              text: question.text,
+            });
+          }
           this.player.isSolving = true;
         },
         new BABYLON.PredicateCondition(this.scene.actionManager as BABYLON.ActionManager, () => {
@@ -249,7 +266,9 @@ export class Game {
     this.setupPickupActions(newPickup);
     this.pickups[newPickup.id] = newPickup;
     this.questionNum++;
-    this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
+    if (this.mode !== 'battle') {
+      this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
+    }
   }
 
   removePickup(id: string) {

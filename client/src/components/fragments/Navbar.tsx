@@ -38,6 +38,9 @@ class Navbar extends Component<INavbarProps> {
           <Link to="/me" className="ui item">
             Profile
           </Link>
+          <Link to="/leaderboard" className="ui item">
+            Leaderboard
+          </Link>
           <Link to="/store" className="ui item">
             Store
           </Link>

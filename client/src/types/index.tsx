@@ -22,9 +22,16 @@ export interface IAchievementState {
   error: string | null;
 }
 
+export interface IUserState {
+  loading: boolean;
+  users: [];
+  error: string | null;
+}
+
 export interface IRootState {
   gameClient: IClientState;
   auth: IAuthState;
   stages: IStageState;
   achievements: IAchievementState;
+  users: IUserState;
 }

@@ -1,12 +1,6 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { TestState } from './TestState';
-
-export enum QuestionStatus {
-  STANDARD = 'std',
-  EVALUATE = 'eval',
-  SOLVED = 'solv',
-  PARTIAL = 'part',
-}
+import { QuestionStatus } from '../constants';
 
 export class QuestionState extends Schema {
   @type('number')
