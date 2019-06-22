@@ -137,3 +137,18 @@ td {
 .achievement-uncompleted {
   background-color: lightgray !important;
 }
+
+.leaderboard-item-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  & .segment {
+    width: 95%;
+  }
+}
+
+.leaderboard-item {
+  & h3 {
+    display: inline;
+  }
+}

@@ -16,6 +16,9 @@ export class UserStats {
   loc!: number;
 
   @Column('smallint', { default: 0 })
+  accumulatedLoc!: number;
+
+  @Column('smallint', { default: 0 })
   coopMatches!: number;
 
   @Column('smallint', { default: 0 })

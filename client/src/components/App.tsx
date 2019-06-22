@@ -28,7 +28,6 @@ class App extends Component<IAppProps> {
   }
 
   componentDidUpdate(prevProps: IAppProps) {
-    console.log('update');
     if (this.props.user && !this.props.client) {
       this.props.connectToGameClient();
     }

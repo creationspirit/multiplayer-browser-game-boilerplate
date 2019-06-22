@@ -11,6 +11,7 @@ import jwt from 'jsonwebtoken';
 
 import { UserStats } from './UserStats';
 import { UserStageStats } from './UserStageStats';
+import { UserItems } from './UserItems';
 import { Achievement } from './Achievement';
 
 type edgarResponse = {
@@ -41,8 +42,11 @@ export class User {
   @OneToOne(type => UserStats, 'user', { cascade: true, eager: true })
   stats!: UserStats;
 
-  @OneToMany(type => UserStageStats, 'user', { cascade: true, eager: true })
+  @OneToMany(type => UserStageStats, stagestats => stagestats.user, { cascade: true, eager: true })
   stageStats!: UserStageStats[];
+
+  @OneToMany(type => UserItems, userItems => userItems.user)
+  items!: UserItems[];
 
   @ManyToMany(type => Achievement, achievement => achievement.users)
   @JoinTable()

@@ -4,18 +4,10 @@ import { Stage } from './Stage';
 
 @Entity()
 export class UserStageStats {
-  @PrimaryColumn()
-  userId!: number;
-
-  @ManyToOne(() => User, 'stageStats')
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, user => user.stageStats, { primary: true })
   user!: User;
 
-  @PrimaryColumn()
-  stageId!: number;
-
-  @ManyToOne(() => Stage, 'userStats')
-  @JoinColumn({ name: 'stageId' })
+  @ManyToOne(() => Stage, stage => stage.userStats, { primary: true, eager: true })
   stage!: Stage;
 
   @Column()

@@ -22,7 +22,7 @@ export class Stage {
   @Column({ length: 200 })
   description!: string;
 
-  @OneToMany(() => UserStageStats, 'stage', { cascade: true })
+  @OneToMany(() => UserStageStats, userStats => userStats.stage)
   userStats!: UserStageStats[];
 
   loadFromEdgarResponse(exercise: edgarExerciseResponse) {
