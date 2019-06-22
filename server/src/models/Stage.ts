@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { UserStageStats } from './UserStageStats';
 
 type edgarExerciseResponse = {
   id: number;
@@ -20,6 +21,9 @@ export class Stage {
 
   @Column({ length: 200 })
   description!: string;
+
+  @OneToMany(() => UserStageStats, userStats => userStats.stage)
+  userStats!: UserStageStats[];
 
   loadFromEdgarResponse(exercise: edgarExerciseResponse) {
     this.edgarId = exercise.id;

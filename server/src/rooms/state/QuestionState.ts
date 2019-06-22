@@ -1,12 +1,6 @@
 import { Schema, type, MapSchema, ArraySchema } from '@colyseus/schema';
 import { TestState } from './TestState';
-
-export enum QuestionStatus {
-  STANDARD = 'std',
-  EVALUATE = 'eval',
-  SOLVED = 'solv',
-  PARTIAL = 'part',
-}
+import { QuestionStatus } from '../constants';
 
 export class QuestionState extends Schema {
   @type('number')
@@ -48,11 +42,5 @@ export class QuestionState extends Schema {
   addTest(testData: any) {
     const newTest = new TestState(testData.input, testData.output);
     this.tests.push(newTest);
-  }
-
-  calculateReward() {
-    const loc = this.solution.split(/\r\n|\r|\n/).length;
-    console.log(loc);
-    return loc * this.score;
   }
 }

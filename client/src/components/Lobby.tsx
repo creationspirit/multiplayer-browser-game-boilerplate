@@ -12,7 +12,7 @@ export interface ILobbyProps {
 }
 
 class Lobby extends Component<ILobbyProps> {
-  state = { availableRooms: [], selectedRoom: undefined };
+  state = { availableRooms: [], availableBattleRooms: [], selectedRoom: undefined };
 
   private checkRoomsInterval!: NodeJS.Timeout;
 
@@ -22,12 +22,19 @@ class Lobby extends Component<ILobbyProps> {
   }
 
   getAvailableRooms = () => {
+    let availableRooms: any[] = [];
+    let availableBattleRooms: any[] = [];
     if (this.props.client) {
-      (this.props.client as Client).getAvailableRooms('game', (rooms, err) => {
-        if (err) {
-          return console.error(err);
+      (this.props.client as Client).getAvailableRooms('game', rooms => {
+        if (rooms) {
+          availableRooms = rooms;
         }
-        this.setState({ availableRooms: rooms });
+        (this.props.client as Client).getAvailableRooms('battle', battleRooms => {
+          if (battleRooms) {
+            availableBattleRooms = battleRooms;
+          }
+          this.setState({ availableRooms, availableBattleRooms });
+        });
       });
     }
   };
@@ -40,11 +47,12 @@ class Lobby extends Component<ILobbyProps> {
     this.setState({ selectedRoom: roomId });
   };
 
-  renderAvailableRooms() {
-    if (this.state.availableRooms.length === 0) {
+  renderAvailableRooms(type: 'battle' | 'game') {
+    const rooms = type === 'battle' ? this.state.availableBattleRooms : this.state.availableRooms;
+    if (rooms.length === 0) {
       return <div className="item">It seems no one is playing at the moment.</div>;
     }
-    return this.state.availableRooms.map((room: any) => {
+    return rooms.map((room: any) => {
       const selected = room.roomId === this.state.selectedRoom;
       return (
         <div
@@ -54,7 +62,7 @@ class Lobby extends Component<ILobbyProps> {
         >
           {selected && (
             <div className="right floated content">
-              <Link to={`/game/${room.roomId}`}>
+              <Link to={{ pathname: `/game/${room.roomId}`, state: { mode: type } }}>
                 <div className="ui primary button">Join</div>
               </Link>
             </div>
@@ -82,7 +90,10 @@ class Lobby extends Component<ILobbyProps> {
               <div className="sub header">Choose one to join</div>
             </div>
           </h3>
-          <div className="ui divided list">{this.renderAvailableRooms()}</div>
+          <div className="ui sub header">Co-op rooms</div>
+          <div className="ui divided list">{this.renderAvailableRooms('game')}</div>
+          <div className="ui sub header">Battle rooms</div>
+          <div className="ui divided list">{this.renderAvailableRooms('battle')}</div>
         </div>
         <RoomWizard />
       </div>

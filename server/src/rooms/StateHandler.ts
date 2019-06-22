@@ -2,10 +2,14 @@ import { Schema, type, MapSchema } from '@colyseus/schema';
 import { PlayerState } from './state/PlayerState';
 import { QuestionState } from './state/QuestionState';
 import { msToMinSec } from '../utils/gameUtils';
+import { GameStatus } from './constants';
 
 export class StateHandler extends Schema {
   @type('string')
   timer: string;
+
+  @type('string')
+  status: string;
 
   @type({ map: PlayerState })
   players = new MapSchema<PlayerState>();
@@ -16,6 +20,7 @@ export class StateHandler extends Schema {
   constructor(time: number) {
     super();
     this.timer = msToMinSec(time);
+    this.status = GameStatus.ONGOING;
   }
 
   addPlayer(clientId: string, player: PlayerState): void {
@@ -36,7 +41,14 @@ export class StateHandler extends Schema {
     this.questions[data.id] = newQuestion;
   }
 
+  removeQuestion(questionId: number): void {
+    delete this.questions[questionId];
+  }
+
   updateTimer(time: number) {
     this.timer = msToMinSec(time);
+    if (time === 0) {
+      this.status = GameStatus.LOSE;
+    }
   }
 }

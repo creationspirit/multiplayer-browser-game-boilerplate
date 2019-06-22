@@ -26,9 +26,34 @@ export type STAGES_SUCCESS = typeof STAGES_SUCCESS;
 export const STAGES_ERROR = 'STAGES_ERROR';
 export type STAGES_ERROR = typeof STAGES_ERROR;
 
+export const ACHIEVEMENTS_LOADING = 'ACHIEVEMENTS_LOADING';
+export type ACHIEVEMENTS_LOADING = typeof ACHIEVEMENTS_LOADING;
+
+export const ACHIEVEMENTS_SUCCESS = 'ACHIEVEMENTS_SUCCESS';
+export type ACHIEVEMENTS_SUCCESS = typeof ACHIEVEMENTS_SUCCESS;
+
+export const ACHIEVEMENTS_ERROR = 'ACHIEVEMENTS_ERROR';
+export type ACHIEVEMENTS_ERROR = typeof ACHIEVEMENTS_ERROR;
+
+export const USERS_LOADING = 'USERS_LOADING';
+export type USERS_LOADING = typeof USERS_LOADING;
+
+export const USERS_SUCCESS = 'USERS_SUCCESS';
+export type USERS_SUCCESS = typeof USERS_SUCCESS;
+
+export const USERS_ERROR = 'USERS_ERROR';
+export type USERS_ERROR = typeof USERS_ERROR;
+
 export enum QuestionStatus {
   STANDARD = 'std',
   EVALUATE = 'eval',
   SOLVED = 'solv',
   PARTIAL = 'part',
+}
+
+export enum GameStatus {
+  ONGOING = 'ong',
+  WIN = 'win',
+  LOSE = 'los',
+  OVER = 'ovr',
 }

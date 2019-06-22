@@ -1,16 +1,36 @@
 html,
 body {
-  overflow: hidden;
+  overflow: auto;
   width: 100%;
-  height: 100%;
+  // height: 100%;
   margin: 0;
   padding: 0;
 }
 
+// #root,
+// .game-wrapper,
+// .App,
+// .router-wrapper {
+//   width: 100%;
+//   height: 100%;
+//   margin: 0;
+//   padding: 0;
+// }
+
+// .ui.container {
+//   height: 0;
+// }
+
+.game-wrapper {
+  height: 100vh;
+  overflow: hidden;
+}
+
 #renderCanvas {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   touch-action: none;
+  overflow: hidden;
 }
 
 .code-edit-ui {
@@ -19,6 +39,16 @@ body {
   right: 10px;
   z-index: 0;
   width: 48%;
+}
+
+.game-result {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  width: 40%;
+  height: 20vh;
 }
 
 .tests-container {
@@ -102,4 +132,23 @@ td {
 
 .stage-selected {
   border: 1px solid #f2711c !important;
+}
+
+.achievement-uncompleted {
+  background-color: lightgray !important;
+}
+
+.leaderboard-item-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  & .segment {
+    width: 95%;
+  }
+}
+
+.leaderboard-item {
+  & h3 {
+    display: inline;
+  }
 }

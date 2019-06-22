@@ -1,12 +1,15 @@
 import { Schema, type } from '@colyseus/schema';
 import { Vector3 } from 'babylonjs';
 
-export class PlayerState extends Schema {
+export class BattlePlayerState extends Schema {
   @type('number')
   id: number;
 
   @type('string')
   name: string;
+
+  @type('string')
+  team: string;
 
   @type('number')
   x: number | undefined;
@@ -14,12 +17,13 @@ export class PlayerState extends Schema {
   @type('number')
   y: number | undefined;
 
-  constructor(id: number, name: string, x: number, y: number) {
+  constructor(id: number, name: string, team: string, x: number, y: number) {
     super();
     this.name = name;
     this.x = x;
     this.y = y;
     this.id = id;
+    this.team = team;
   }
 
   updatePosition(position: Vector3) {

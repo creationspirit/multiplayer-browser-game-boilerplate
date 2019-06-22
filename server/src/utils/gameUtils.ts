@@ -22,3 +22,17 @@ export const getRandomArrayElements = (arr: any[], n: number): any[] => {
   }
   return result;
 };
+
+export const EXP_CONSTANT = 38;
+
+export const calculateExpLvlThreshold = (level: number) => {
+  return EXP_CONSTANT * Math.pow(level, 2);
+};
+
+export const calculateCurrentLevelExp = (exp: number, level: number) => {
+  return exp - calculateExpLvlThreshold(level);
+};
+
+export const calculateCurrentLevelGap = (level: number) => {
+  return calculateExpLvlThreshold(level + 1) - calculateExpLvlThreshold(level);
+};

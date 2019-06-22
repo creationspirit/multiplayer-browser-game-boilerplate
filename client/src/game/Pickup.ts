@@ -11,6 +11,7 @@ export class Pickup {
   solveAreaBox!: BABYLON.Mesh;
   particleSet!: BABYLON.ParticleSystemSet;
   label!: GUI.Rectangle;
+  actions: BABYLON.IAction[] = [];
 
   constructor(scene: BABYLON.Scene, id: string, prefabMesh: BABYLON.Mesh) {
     this.scene = scene;
@@ -74,5 +75,13 @@ export class Pickup {
     label.addControl(textBlock);
 
     return label;
+  }
+
+  dispose() {
+    this.particleSet.dispose();
+    this.solveAreaBox.dispose();
+    this.boundingBox.dispose();
+    this.label.dispose();
+    this.pickupMesh.dispose();
   }
 }

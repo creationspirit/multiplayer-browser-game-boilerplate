@@ -27,7 +27,11 @@ router.get('/', auth, async (req: Request, res: Response) => {
       }
     });
     await repository.save(stages);
-    res.send({ stages });
+    const newStages = await repository.find({
+      relations: ['userStats'],
+      where: { userStats: { userId: req.user.id } },
+    });
+    res.send({ stages: newStages });
   } catch (e) {
     res.status(400).send({ message: 'Unable to fetch stages.' });
   }

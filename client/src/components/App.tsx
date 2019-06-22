@@ -5,6 +5,8 @@ import { connect } from 'react-redux';
 import Game from './Game';
 import Lobby from './Lobby';
 import Login from './Login';
+import Profile from './Profile';
+import Leaderboard from './Leaderboard';
 import { ProtectedRoute, IProtectedRouteProps } from './fragments/ProtectedRoute';
 import { IRootState } from '../types';
 import { connectToGameClient } from '../thunks';
@@ -26,7 +28,6 @@ class App extends Component<IAppProps> {
   }
 
   componentDidUpdate(prevProps: IAppProps) {
-    console.log('update');
     if (this.props.user && !this.props.client) {
       this.props.connectToGameClient();
     }
@@ -43,7 +44,7 @@ class App extends Component<IAppProps> {
     return (
       <div className="App">
         <BrowserRouter>
-          <div>
+          <div className="router-wrapper">
             <Switch>
               <Route path="/login" exact={true} component={Login} />
               <ProtectedRoute
@@ -57,6 +58,18 @@ class App extends Component<IAppProps> {
                 path="/game/:roomId"
                 exact={true}
                 component={Game}
+              />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/me"
+                exact={true}
+                component={Profile}
+              />
+              <ProtectedRoute
+                {...defaultProtectedRouteProps}
+                path="/leaderboard"
+                exact={true}
+                component={Leaderboard}
               />
             </Switch>
           </div>

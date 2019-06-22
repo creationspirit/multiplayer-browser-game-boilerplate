@@ -27,7 +27,7 @@ export enum PrefabID {
 export class Game {
   private canvas: HTMLCanvasElement;
   private engine: BABYLON.Engine;
-  private scene: BABYLON.Scene;
+  scene: BABYLON.Scene;
 
   private prefabs: { [id: string]: BABYLON.Mesh } = {};
   private lights: Lights;
@@ -36,6 +36,10 @@ export class Game {
   private area: Area;
   private pickups: { [id: string]: Pickup } = {};
   timer!: GUI.TextBlock;
+  scoreboard!: GUI.TextBlock;
+  private questionNum: number;
+  private solvedQuestionsNum: number;
+  private mode: string;
 
   private advancedTexture: GUI.AdvancedDynamicTexture;
   private assetsManager: BABYLON.AssetsManager;
@@ -45,6 +49,8 @@ export class Game {
   private setTaskInProgress: () => void;
   private removeTaskInProgress: () => void;
   setQuestion: (question: any) => void;
+  resetState: (questionId: number) => void;
+  setGameResult: (gameResult: string) => void;
 
   constructor(
     args: ISceneEventArgs,
@@ -53,7 +59,9 @@ export class Game {
     roomData: any,
     setTaskInProgress: () => void,
     removeTaskInProgress: () => void,
-    setQuestion: (question: any) => void
+    setQuestion: (question: any) => void,
+    resetState: (questionId: number) => void,
+    setGameResult: (gameResult: string) => void
   ) {
     this.canvas = args.canvas as HTMLCanvasElement;
     this.engine = args.engine;
@@ -65,13 +73,26 @@ export class Game {
     this.area = new Area(this.scene);
 
     this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI('ui', true, this.scene);
-    this.timer = this.createTimerGUI();
+    const { timerLabel, scoreboard } = this.createTimerGUI();
+    this.timer = timerLabel;
+    this.scoreboard = scoreboard;
+    this.mode = roomData.mode;
+    if (roomData.mode === 'battle') {
+      this.timer.text = 'BLUE - RED';
+      this.scoreboard.text = '0 - 0';
+    }
+    this.createCrosshairGUI();
     this.assetsManager = new BABYLON.AssetsManager(this.scene);
+
+    this.questionNum = 0;
+    this.solvedQuestionsNum = 0;
 
     // Store references to react state callbacks
     this.setTaskInProgress = setTaskInProgress;
     this.removeTaskInProgress = removeTaskInProgress;
     this.setQuestion = setQuestion;
+    this.resetState = resetState;
+    this.setGameResult = setGameResult;
   }
 
   private createMeshTask(taskId: string, fileName: string) {
@@ -161,9 +182,20 @@ export class Game {
           parameter: ' ',
         },
         () => {
-          this.setQuestion(
-            this.router.room.state.questions[(this.player.inSolvingAreaOf as Pickup).id]
-          );
+          const question = this.router.room.state.questions[
+            (this.player.inSolvingAreaOf as Pickup).id
+          ];
+          if (this.mode === 'game') {
+            this.setQuestion(question);
+          } else {
+            this.setQuestion({
+              solution: question.solutions[this.router.team as string].solution,
+              tests: question.solutions[this.router.team as string].tests,
+              status: question.solutions[this.router.team as string].status,
+              id: question.id,
+              text: question.text,
+            });
+          }
           this.player.isSolving = true;
         },
         new BABYLON.PredicateCondition(this.scene.actionManager as BABYLON.ActionManager, () => {
@@ -175,7 +207,7 @@ export class Game {
 
   private setupPickupActions(pickup: Pickup) {
     const actionManager = this.player.getActionManager();
-    actionManager.registerAction(
+    pickup.actions.push(actionManager.registerAction(
       new BABYLON.ExecuteCodeAction(
         {
           trigger: BABYLON.ActionManager.OnIntersectionEnterTrigger,
@@ -187,8 +219,8 @@ export class Game {
           this.player.inSolvingAreaOf = pickup;
         }
       )
-    );
-    actionManager.registerAction(
+    ) as BABYLON.IAction);
+    pickup.actions.push(actionManager.registerAction(
       new BABYLON.ExecuteCodeAction(
         {
           trigger: BABYLON.ActionManager.OnIntersectionExitTrigger,
@@ -200,13 +232,22 @@ export class Game {
           this.removeTaskInProgress();
         }
       )
-    );
+    ) as BABYLON.IAction);
   }
 
   addPlayer(key: string, position: BABYLON.Vector3) {
     const newRival = new Rival(this.scene, this.prefabs[PrefabID.PLAYER], key);
     newRival.init(position);
     this.rivals[key] = newRival;
+  }
+
+  removePlayer(key: string) {
+    const rival = this.rivals[key];
+    if (rival) {
+      rival.skeleton.dispose();
+      rival.mesh.dispose();
+      delete this.rivals[key];
+    }
   }
 
   updatePlayer(key: string, position: BABYLON.Vector3) {
@@ -224,30 +265,96 @@ export class Game {
     newPickup.init(this.lights, position);
     this.setupPickupActions(newPickup);
     this.pickups[newPickup.id] = newPickup;
+    this.questionNum++;
+    if (this.mode !== 'battle') {
+      this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
+    }
+  }
+
+  removePickup(id: string) {
+    const pickup: Pickup = this.pickups[id];
+    if (pickup) {
+      const actionManager = this.player.getActionManager();
+      pickup.actions.forEach(action => {
+        actionManager.unregisterAction(action);
+      });
+      pickup.dispose();
+      delete this.pickups[id];
+      this.solvedQuestionsNum++;
+    }
+    this.scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
   }
 
   createTimerGUI() {
     const label = new GUI.Rectangle(`timer_rectangle`);
     label.background = 'black';
-    label.paddingTop = 10;
+    label.paddingTop = '10px';
     label.alpha = 0.6;
     label.cornerRadius = 20;
-    label.width = 0.06;
-    label.height = 0.05;
+    label.width = '200px';
+    label.height = '100px';
+    label.thickness = 1;
+    label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    const panel = new GUI.StackPanel();
+    label.addControl(panel);
+
+    const timerLabel = new GUI.TextBlock();
+    timerLabel.resizeToFit = true;
+    timerLabel.text = '30:00';
+    timerLabel.fontSize = 30;
+    timerLabel.fontStyle = 'bold';
+    timerLabel.color = 'white';
+    panel.addControl(timerLabel);
+
+    const scoreboard = new GUI.TextBlock();
+    scoreboard.resizeToFit = true;
+    scoreboard.text = `${this.solvedQuestionsNum}/${this.questionNum}`;
+    scoreboard.fontSize = 30;
+    scoreboard.fontStyle = 'bold';
+    scoreboard.color = 'white';
+    panel.addControl(scoreboard);
+
+    this.advancedTexture.addControl(label);
+
+    return { timerLabel, scoreboard };
+  }
+
+  createNotificationGUI(text: string, timeout: number | null = null) {
+    const label = new GUI.Rectangle('reward_rectangle');
+    label.background = 'black';
+    label.paddingTop = '120px';
+    label.alpha = 0.6;
+    label.cornerRadius = 20;
+    label.width = '350px';
+    label.height = '270px';
     label.thickness = 1;
     label.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     label.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
 
     const textBlock = new GUI.TextBlock();
     textBlock.resizeToFit = true;
-    textBlock.text = '30:00';
-    textBlock.fontSize = 36;
+    textBlock.text = text;
+    textBlock.fontSize = 30;
     textBlock.fontStyle = 'bold';
     textBlock.color = 'white';
     label.addControl(textBlock);
-
     this.advancedTexture.addControl(label);
+    if (timeout) {
+      setTimeout(() => {
+        this.advancedTexture.removeControl(label);
+        label.dispose();
+      }, timeout);
+    }
+  }
 
-    return textBlock;
+  createCrosshairGUI() {
+    const image = new GUI.Image('crosshair', `${process.env.PUBLIC_URL}/icons/crosshair.png`);
+    image.width = '30px';
+    image.height = '30px';
+    image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    this.advancedTexture.addControl(image);
   }
 }

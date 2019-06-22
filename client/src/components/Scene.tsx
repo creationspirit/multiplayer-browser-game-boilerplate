@@ -66,6 +66,8 @@ export default class Scene extends Component<
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.onResizeWindow);
+    (this.scene as BABYLON.Scene).dispose();
+    (this.engine as BABYLON.Engine).dispose();
   }
 
   render() {

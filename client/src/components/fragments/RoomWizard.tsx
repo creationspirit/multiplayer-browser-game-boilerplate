@@ -5,10 +5,11 @@ import { Progress } from 'semantic-ui-react';
 
 import { IRootState } from '../../types';
 import { fetchStages } from '../../thunks/stages';
+import { getLevelVerbose } from '../../utils';
 
 interface IRoomWizardProps {
   loading: boolean;
-  stages: [];
+  stages: any[];
   error: string | null;
   fetchStages: () => void;
 }
@@ -28,8 +29,8 @@ class RoomWizard extends Component<IRoomWizardProps> {
     this.setState({ difficulty: difficultyId });
   };
 
-  setMode = (modeId: number) => {
-    this.setState({ mode: modeId });
+  setMode = (mode: string) => {
+    this.setState({ mode });
   };
 
   renderStages = () => {
@@ -49,11 +50,11 @@ class RoomWizard extends Component<IRoomWizardProps> {
             <div className="description">{stage.description}</div>
           </div>
           <div className="extra content">
-            <Progress percent={30} indicating={true} size="tiny" />
-            <span className="right floated">Beginner</span>
+            <Progress percent={stage.userStats[0].loc} indicating={true} size="tiny" />
+            <span className="right floated">{getLevelVerbose(stage.userStats[0].level)}</span>
             <span>
               <i className="terminal icon" />
-              124 LOC
+              {stage.userStats[0].loc} LOC
             </span>
           </div>
         </div>
@@ -94,14 +95,14 @@ class RoomWizard extends Component<IRoomWizardProps> {
       <div className="room-wizard-mode">
         <div className="ui sub header">Choose mode</div>
         <button
-          className={`fluid ui button ${this.state.mode === 1 ? 'orange' : ''}`}
-          onClick={() => this.setMode(1)}
+          className={`fluid ui button ${this.state.mode === 'game' ? 'orange' : ''}`}
+          onClick={() => this.setMode('game')}
         >
           Co-op
         </button>
         <button
-          className={`fluid ui button ${this.state.mode === 2 ? 'orange' : ''}`}
-          onClick={() => this.setMode(2)}
+          className={`fluid ui button ${this.state.mode === 'battle' ? 'orange' : ''}`}
+          onClick={() => this.setMode('battle')}
         >
           Battle
         </button>

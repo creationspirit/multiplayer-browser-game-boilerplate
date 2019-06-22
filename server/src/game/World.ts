@@ -77,11 +77,6 @@ export class World {
 
     this.assetsManager.onFinish = tasks => {
       this.area.init(levelConfig.corridors, this.prefabs);
-      // levelConfig.pickups.forEach((pickupConfig: any) => {
-      //   const newPickup = new Pickup(this.scene, pickupConfig.id);
-      //   newPickup.init(createVector(pickupConfig.position));
-      //   this.pickups[newPickup.id] = newPickup;
-      // });
 
       this.scene.executeWhenReady(() => {
         console.log('scene ready');
@@ -119,6 +114,10 @@ export class World {
     if (pickup !== undefined) {
       pickup.boundingBox.dispose();
     }
-    delete this.players[id];
+    delete this.pickups[id];
+  }
+
+  dispose() {
+    this.scene.dispose();
   }
 }
