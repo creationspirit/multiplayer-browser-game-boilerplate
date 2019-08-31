@@ -9,7 +9,7 @@ import cors from 'cors';
 const app = express();
 
 app.set('port', process.env.PORT || 4000);
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
+app.use(express.static(path.join(__dirname, '/../client/build')));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -17,5 +17,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('combined'));
 
 app.use(cors());
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '/../client/build/index.html'));
+  });
 
 export default app;
