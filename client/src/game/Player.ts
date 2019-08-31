@@ -1,8 +1,6 @@
 import * as BABYLON from 'babylonjs';
 import { RouterService } from './routing/routerService';
 
-import { Pickup } from './Pickup';
-
 export const LEFT: [number, string] = [65, 'a'];
 export const RIGHT: [number, string] = [68, 'd'];
 export const UP: [number, string] = [87, 'w'];
@@ -14,15 +12,9 @@ export class Player {
   private keyFired: any = {};
   speed: number = 0.3;
   camera!: BABYLON.UniversalCamera;
-  actionTriggerBox!: BABYLON.Mesh;
-  id: string;
 
-  inSolvingAreaOf?: Pickup;
-  isSolving = false;
-
-  constructor(scene: BABYLON.Scene, id: string) {
+  constructor(scene: BABYLON.Scene) {
     this.scene = scene;
-    this.id = id;
   }
 
   init(position: BABYLON.Vector3) {
@@ -38,20 +30,11 @@ export class Player {
     this.camera.setTarget(BABYLON.Vector3.Zero());
     this.scene.activeCamera = this.camera;
 
-    // This mesh is used to trigger actions on intersection
-    this.actionTriggerBox = BABYLON.MeshBuilder.CreateBox('collider', { size: 1 }, this.scene);
-    this.actionTriggerBox.parent = this.camera;
-    this.actionTriggerBox.actionManager = new BABYLON.ActionManager(this.scene);
-
     // This attaches the camera to the canvas
     this.camera.attachControl(
       this.scene.getEngine().getRenderingCanvas() as HTMLCanvasElement,
       true
     );
-  }
-
-  getActionManager() {
-    return this.actionTriggerBox.actionManager as BABYLON.ActionManager;
   }
 
   private keyDownEvt(keyCode: number) {
@@ -110,6 +93,7 @@ export class Player {
   }
 
   update(position: BABYLON.Vector3) {
-    this.camera.position = position;
+    this.camera.position.x = position.x;
+    this.camera.position.z = position.z;
   }
 }
