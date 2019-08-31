@@ -2,11 +2,8 @@ import { Schema, type } from '@colyseus/schema';
 import { Vector3 } from 'babylonjs';
 
 export class PlayerState extends Schema {
-  @type('number')
-  id: number;
-
   @type('string')
-  name: string;
+  id: string;
 
   @type('number')
   x: number | undefined;
@@ -14,9 +11,8 @@ export class PlayerState extends Schema {
   @type('number')
   y: number | undefined;
 
-  constructor(id: number, name: string, x: number, y: number) {
+  constructor(id: string, x: number, y: number) {
     super();
-    this.name = name;
     this.x = x;
     this.y = y;
     this.id = id;

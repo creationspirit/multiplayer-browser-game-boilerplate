@@ -5,10 +5,6 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 
-import userController from './controllers/user';
-import stageController from './controllers/stage';
-import achievementController from './controllers/achievement';
-
 // Create Express server
 const app = express();
 
@@ -19,10 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(morgan('combined'));
-app.use(cors());
 
-app.use('/users', userController);
-app.use('/stages', stageController);
-app.use('/achievements', achievementController);
+app.use(cors());
 
 export default app;

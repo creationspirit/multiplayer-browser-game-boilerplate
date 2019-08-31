@@ -1,5 +1,4 @@
 import * as BABYLON from 'babylonjs';
-import { createVector } from '../utils/gameUtils';
 
 export class Player {
   private scene: BABYLON.Scene;

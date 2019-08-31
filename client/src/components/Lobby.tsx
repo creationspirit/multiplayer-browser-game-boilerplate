@@ -4,37 +4,27 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { IRootState } from '../types';
-import Navbar from './fragments/Navbar';
-import RoomWizard from './fragments/RoomWizard';
 
 export interface ILobbyProps {
   client: Client | null;
 }
 
 class Lobby extends Component<ILobbyProps> {
-  state = { availableRooms: [], availableBattleRooms: [], selectedRoom: undefined };
+  state = { availableRooms: [],  selectedRoom: undefined };
 
   private checkRoomsInterval!: NodeJS.Timeout;
 
   componentDidMount() {
-    this.checkRoomsInterval = setInterval(this.getAvailableRooms, 4000);
+    this.checkRoomsInterval = setInterval(this.getAvailableRooms, 3000);
     this.getAvailableRooms();
   }
 
   getAvailableRooms = () => {
-    let availableRooms: any[] = [];
-    let availableBattleRooms: any[] = [];
     if (this.props.client) {
       (this.props.client as Client).getAvailableRooms('game', rooms => {
         if (rooms) {
-          availableRooms = rooms;
+          this.setState({ availableRooms: rooms });
         }
-        (this.props.client as Client).getAvailableRooms('battle', battleRooms => {
-          if (battleRooms) {
-            availableBattleRooms = battleRooms;
-          }
-          this.setState({ availableRooms, availableBattleRooms });
-        });
       });
     }
   };
@@ -47,8 +37,8 @@ class Lobby extends Component<ILobbyProps> {
     this.setState({ selectedRoom: roomId });
   };
 
-  renderAvailableRooms(type: 'battle' | 'game') {
-    const rooms = type === 'battle' ? this.state.availableBattleRooms : this.state.availableRooms;
+  renderAvailableRooms() {
+    const rooms = this.state.availableRooms;
     if (rooms.length === 0) {
       return <div className="item">It seems no one is playing at the moment.</div>;
     }
@@ -62,7 +52,7 @@ class Lobby extends Component<ILobbyProps> {
         >
           {selected && (
             <div className="right floated content">
-              <Link to={{ pathname: `/game/${room.roomId}`, state: { mode: type } }}>
+              <Link to={{ pathname: `/game/${room.roomId}`}}>
                 <div className="ui primary button">Join</div>
               </Link>
             </div>
@@ -81,7 +71,6 @@ class Lobby extends Component<ILobbyProps> {
   render() {
     return (
       <div className="ui container">
-        <Navbar />
         <div className="ui raised segment">
           <h3 className="ui header">
             <i className="circular inverted users icon" />
@@ -90,12 +79,11 @@ class Lobby extends Component<ILobbyProps> {
               <div className="sub header">Choose one to join</div>
             </div>
           </h3>
-          <div className="ui sub header">Co-op rooms</div>
-          <div className="ui divided list">{this.renderAvailableRooms('game')}</div>
-          <div className="ui sub header">Battle rooms</div>
-          <div className="ui divided list">{this.renderAvailableRooms('battle')}</div>
+          <div className="ui divided list">{this.renderAvailableRooms()}</div>
+          <Link to={{ pathname: '/game/new'}}>
+            <div className="ui primary button">Create new room</div>
+          </Link>
         </div>
-        <RoomWizard />
       </div>
     );
   }

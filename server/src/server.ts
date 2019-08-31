@@ -2,9 +2,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Establish database connection
-import './config/db';
-
 import { Server } from 'colyseus';
 import { createServer } from 'http';
 import { monitor } from '@colyseus/monitor';
@@ -12,12 +9,6 @@ import errorHandler from 'errorhandler';
 
 import app from './app';
 import { GameRoom } from './rooms/GameRoom';
-import { BattleRoom } from './rooms/BattleRoom';
-
-/**
- * Error Handler. Provides full stack - remove for production
- */
-app.use(errorHandler());
 
 /**
  * Start Express server.
@@ -28,7 +19,6 @@ const gameServer = new Server({
 });
 
 gameServer.register('game', GameRoom);
-gameServer.register('battle', BattleRoom);
 // Register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor(gameServer));
 
