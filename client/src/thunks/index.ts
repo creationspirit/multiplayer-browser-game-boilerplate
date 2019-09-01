@@ -9,8 +9,8 @@ export type ThunkResult<R> = ThunkAction<R, IRootState, undefined, IActions>;
 
 export const connectToGameClient = (): ThunkResult<void> => {
   return async (dispatch: Dispatch) => {
-    // This should be refactored in the future, endpoint should be dynamic
-    const client = new Colyseus.Client('ws://localhost:4000');
+    const gameServerUrl = process.env.NODE_ENV === 'development' ? 'ws://localhost:4000' : process.env.REACT_APP_GAME_SERVER_URL;
+    const client = new Colyseus.Client(gameServerUrl as string);
     await dispatch(addGameClient(client));
   };
 };

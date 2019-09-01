@@ -22,8 +22,7 @@ gameServer.register('game', GameRoom);
 app.use('/colyseus', monitor(gameServer));
 
 const server = gameServer.listen(app.get('port'), undefined, undefined, () => {
-  console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
-  console.log('Game server is running at ws://localhost:%d', app.get('port'));
+  console.log('App is running in %s mode', app.get('port'), app.get('env'));
   console.log('Press CTRL-C to stop\n');
 });
 
