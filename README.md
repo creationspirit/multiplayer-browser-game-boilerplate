@@ -1,7 +1,10 @@
 # React + BabylonJS + Colyseus (with BabylonJS NullEngine) starter project
 
-This is a starter project for a realtime 3D multiplayer game with isolated multiplayer rooms.
+This is a starter project for a realtime 3D multiplayer game with simple rooms lobby.
 You can try a live demo [here](https://powerful-shore-32599.herokuapp.com/).
+
+![alt text](lobby-screenshot.png)
+![alt text](game-screenshot.png)
 
 ## Main tech stack
 
