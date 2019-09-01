@@ -14,7 +14,11 @@
     "copy-static-assets": "ts-node copyStaticAssets.ts",
     "debug": "yarn build && yarn watch-debug",
     "serve-debug": "nodemon --inspect dist/server.js",
-    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"yarn watch-ts\" \"yarn serve-debug\""
+    "watch-debug": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"yarn watch-ts\" \"yarn serve-debug\"",
+    "heroku-postbuild": "cd client && yarn && yarn build"
+  },
+  "engines": {
+    "node": "10.x"
   },
   "dependencies": {
     "@colyseus/monitor": "^0.10.0",
