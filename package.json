@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@colyseus/monitor": "^0.10.0",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "babylonjs": "^4.0.3",
     "body-parser": "^1.19.0",
     "colyseus": "^0.10.7",
