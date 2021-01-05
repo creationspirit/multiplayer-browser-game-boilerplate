@@ -9,7 +9,7 @@
     "@types/react-dom": "16.8.2",
     "@types/react-redux": "^7.0.1",
     "@types/react-router-dom": "^4.3.5",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "babylonjs": "^4.0.3",
     "babylonjs-gui": "^4.0.3",
     "cannon": "^0.6.2",
